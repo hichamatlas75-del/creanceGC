@@ -28,6 +28,24 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
   <link rel="shortcut icon" href="favicon.ico">
 
+  <!-- Balises Open Graph / WhatsApp / Facebook Rich Preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Grey Corner Café">
+  <meta property="og:title" content="☕ Grey Corner Café — Espace Client Privilège">
+  <meta property="og:description" content="Suivi en direct de votre solde, vos commandes et vos tickets au Grey Corner Café.">
+  <meta property="og:image" content="assets/og-image.jpg">
+  <meta property="og:image:secure_url" content="assets/og-image.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Grey Corner Café — Espace Client">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="☕ Grey Corner Café — Espace Client Privilège">
+  <meta name="twitter:description" content="Suivi en direct de votre solde, vos commandes et vos tickets au Grey Corner Café.">
+  <meta name="twitter:image" content="assets/og-image.jpg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -132,6 +150,24 @@
     }
 
     .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 9px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 2px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+      flex-shrink: 0;
+    }
+
+    .brand-titles {
       display: flex;
       flex-direction: column;
     }
@@ -758,7 +794,20 @@
 
     .auth-brand-logo {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
+    }
+
+    .auth-logo-img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 8px;
+      margin: 0 auto 12px;
+      display: block;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     }
 
     .auth-brand-title {
@@ -1764,8 +1813,9 @@
   <!-- ÉCRAN AUTHENTIFICATION (Connexion / Inscription) -->
   <div id="auth-screen" class="auth-wrapper">
     <div class="auth-brand-logo">
+      <img src="assets/logo.png" alt="Grey Corner Café" class="auth-logo-img" />
       <div class="auth-brand-title">Grey Corner</div>
-      <div class="auth-brand-sub">Créances & Dépôts Clients</div>
+      <div class="auth-brand-sub">Café • Espace Client Privilège</div>
     </div>
 
     <div class="card">
@@ -1829,8 +1879,11 @@
     <header>
       <div class="header-inner">
         <div class="brand">
-          <div class="brand-title">Grey Corner</div>
-          <div class="brand-subtitle">Espace Créance</div>
+          <img src="assets/logo.png" alt="Grey Corner Café" class="brand-logo-img" />
+          <div class="brand-titles">
+            <div class="brand-title">Grey Corner</div>
+            <div class="brand-subtitle">Café • Espace Client</div>
+          </div>
         </div>
         <div class="user-pill">
           <span class="user-name" id="user-display-name">-</span>
@@ -3034,12 +3087,26 @@
       }
     };
 
-    // Partage de l'application via WhatsApp
+    // Partage de l'application via WhatsApp avec message luxe et lien direct
     window.shareViaWhatsApp = () => {
       const origin = window.location.origin;
       const cleanPath = window.location.pathname.replace(/\/creance\.html$/, '/index.html');
       const shareUrl = origin + cleanPath;
-      const message = `👋 Bonjour ! Voici le lien direct pour accéder à votre espace client Grey Corner (suivi de solde, enregistrement des tickets de commande et historique) :\n\n👉 ${shareUrl}`;
+      const message = 
+`☕ *GREY CORNER CAFÉ*
+✨ _Espace Client Privilège_
+
+Bonjour ! Retrouvez votre espace personnel en ligne pour suivre votre compte en direct :
+
+💳 *Solde en direct* : Consultez votre solde disponible
+📸 *Tickets & Commandes* : Photographiez vos reçus avec scan auto
+🧾 *Historique complet* : Suivez tous vos règlements et consommations
+
+👉 *Accéder à mon espace :*
+${shareUrl}
+
+_Pensez à ajouter l'application sur votre écran d'accueil pour y accéder en 1 clic !_`;
+
       const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     };

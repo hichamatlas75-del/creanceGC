@@ -3,7 +3,7 @@
    Version: 1.0.1 (Fix auth & Firebase Hosting bypass)
    ========================================================================== */
 
-const CACHE_NAME = 'grey-corner-cache-v2';
+const CACHE_NAME = 'grey-corner-cache-v3';
 
 const STATIC_ASSETS = [
   './',
@@ -13,6 +13,9 @@ const STATIC_ASSETS = [
   './manifest.webmanifest',
   './manifest.json',
   './favicon.ico',
+  './assets/logo.png',
+  './assets/og-image.jpg',
+  './assets/og-image-square.jpg',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
