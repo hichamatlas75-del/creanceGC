@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <!-- Lecteur OCR automatique Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --bg: #14120f;
@@ -735,6 +737,93 @@
       to { transform: rotate(360deg); }
     }
 
+    /* OCR Styles & Feedback */
+    .ocr-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(195, 161, 91, 0.12);
+      color: var(--accent-brass);
+      border: 1px solid rgba(195, 161, 91, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s;
+    }
+
+    .ocr-message {
+      font-size: 12px;
+      margin-top: 8px;
+      padding: 10px 13px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.4;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .ocr-message.scanning {
+      background: rgba(195, 161, 91, 0.1);
+      border: 1px solid rgba(195, 161, 91, 0.35);
+      color: var(--accent-brass);
+    }
+
+    .ocr-message.success {
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(111, 174, 122, 0.45);
+      color: #9cd1a4;
+    }
+
+    .ocr-message.notice {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .input-glow-success {
+      border-color: var(--accent-green) !important;
+      box-shadow: 0 0 0 3px rgba(111, 174, 122, 0.25) !important;
+    }
+
+    .spinner-sm {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(195, 161, 91, 0.25);
+      border-top-color: var(--accent-brass);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .btn-rescan {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 18, 15, 0.9);
+      color: var(--accent-brass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      transition: all 0.2s;
+      white-space: nowrap;
+      z-index: 5;
+    }
+
+    .btn-rescan:hover {
+      background: rgba(31, 27, 22, 0.95);
+      border-color: var(--accent-brass);
+      color: #fff;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -869,8 +958,14 @@
 
         <form id="order-form" onsubmit="handleSendOrder(event)">
           <div class="form-group">
-            <label for="cmd-amount">Montant du ticket (DH)</label>
-            <input type="number" id="cmd-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 85.00" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="cmd-amount" style="margin-bottom: 0;">Montant du ticket (DH)</label>
+              <span id="ocr-status-badge" class="ocr-badge hidden">
+                <span class="spinner-sm"></span> <span>Lecture auto...</span>
+              </span>
+            </div>
+            <input type="number" id="cmd-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 366.00" required>
+            <div id="ocr-message" class="ocr-message hidden"></div>
           </div>
 
           <div class="form-group">
@@ -882,12 +977,15 @@
                 <circle cx="12" cy="13" r="4"></circle>
               </svg>
               <div class="upload-hint" id="upload-hint-text">Prendre en photo le ticket</div>
-              <div class="upload-subhint">Appareil photo mobile ou fichier</div>
+              <div class="upload-subhint">Appareil photo mobile ou fichier • Lecture auto du Total</div>
             </div>
 
             <div id="preview-box" class="preview-container">
               <img id="preview-img" class="preview-img" alt="Aperçu ticket" />
               <button type="button" class="preview-remove-btn" onclick="clearSelectedPhoto(event)" title="Supprimer la photo">✕</button>
+              <button type="button" id="btn-rescan-ocr" class="btn-rescan" onclick="rescanCurrentPhoto(event)" title="Re-scanner le montant">
+                🔍 Re-scanner le montant
+              </button>
             </div>
           </div>
 
@@ -1384,20 +1482,211 @@
       container.innerHTML = html;
     }
 
+    // Gestion sélection et compression photo + OCR automatique
+    let currentRawPhotoFile = null;
+
+    // Prétraitement de l'image pour optimiser la lisibilité du ticket thermique par l'OCR
+    function prepareReceiptCanvasForOcr(source) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1100;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // Filtre de rehaussement de contraste doux adapté au texte thermique
+          try {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            for (let i = 0; i < d.length; i += 4) {
+              const lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              const factor = 1.35;
+              let v = factor * (lum - 128) + 128;
+              v = Math.max(0, Math.min(255, v));
+              d[i] = v;
+              d[i + 1] = v;
+              d[i + 2] = v;
+            }
+            ctx.putImageData(imgData, 0, 0);
+          } catch (e) {
+            console.warn("Filtre canvas OCR ignoré:", e);
+          }
+          resolve(canvas);
+        };
+
+        if (typeof source === 'string') {
+          img.src = source;
+        } else {
+          const reader = new FileReader();
+          reader.onload = (e) => { img.src = e.target.result; };
+          reader.readAsDataURL(source);
+        }
+      });
+    }
+
+    // Extraction robuste du montant Total TTC d'un ticket de caisse
+    function parseTotalFromReceiptText(text) {
+      if (!text) return null;
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+      // Patterns prioritaires ciblant "Total TTC : 366,00", "Total : 85,00", etc.
+      const patterns = [
+        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global|payer)?\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /total\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /total.*?([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global)?\s*[:=\s]*([0-9]{1,5})(?:\s*dh|\s*mad)?$/i
+      ];
+
+      for (const line of lines) {
+        for (const regex of patterns) {
+          const match = line.match(regex);
+          if (match && match[1]) {
+            const clean = match[1].replace(/\s/g, '').replace(',', '.');
+            const num = parseFloat(clean);
+            if (!isNaN(num) && num > 0 && num < 100000) {
+              return num;
+            }
+          }
+        }
+      }
+
+      // Recherche contextuelle autour du mot-clé TOTAL dans le texte entier
+      const fullText = text.replace(/\r/g, ' ');
+      const totalIdx = fullText.toLowerCase().lastIndexOf('total');
+      if (totalIdx !== -1) {
+        const snippet = fullText.slice(totalIdx, totalIdx + 120);
+        const m = snippet.match(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/);
+        if (m && m[1]) {
+          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
+          if (!isNaN(num) && num > 0) return num;
+        }
+      }
+
+      // Fallback : nombre le plus élevé parmi les dernières lignes du ticket (hors coordonnées)
+      const candidateNumbers = [];
+      const bottomLines = lines.slice(Math.max(0, lines.length - 8));
+      for (const line of bottomLines) {
+        if (/tel|wifi|ice/i.test(line)) continue;
+        const matches = line.matchAll(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/g);
+        for (const m of matches) {
+          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
+          if (!isNaN(num) && num > 0 && num < 50000) {
+            candidateNumbers.push(num);
+          }
+        }
+      }
+
+      if (candidateNumbers.length > 0) {
+        return Math.max(...candidateNumbers);
+      }
+
+      return null;
+    }
+
+    // Exécution du scan OCR automatique
+    async function runAutoOcrScan(imageSource) {
+      const badgeEl = document.getElementById('ocr-status-badge');
+      const msgEl = document.getElementById('ocr-message');
+      const amountInput = document.getElementById('cmd-amount');
+
+      badgeEl.classList.remove('hidden');
+      badgeEl.innerHTML = `<span class="spinner-sm"></span> <span>Lecture auto...</span>`;
+      badgeEl.style.color = "var(--accent-brass)";
+      badgeEl.style.borderColor = "rgba(195, 161, 91, 0.35)";
+
+      msgEl.className = "ocr-message scanning";
+      msgEl.innerHTML = `<span class="spinner-sm"></span> <span>Lecture automatique du montant sur le ticket en cours...</span>`;
+      msgEl.classList.remove('hidden');
+
+      try {
+        if (typeof Tesseract === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
+            document.head.appendChild(s);
+          });
+        }
+
+        const processedCanvas = await prepareReceiptCanvasForOcr(imageSource);
+        const worker = await Tesseract.createWorker('eng');
+        const ret = await worker.recognize(processedCanvas);
+        await worker.terminate();
+
+        const rawText = ret && ret.data && ret.data.text ? ret.data.text : '';
+        console.log("Texte extrait du ticket (OCR) :", rawText);
+
+        const detectedTotal = parseTotalFromReceiptText(rawText);
+
+        if (detectedTotal && detectedTotal > 0) {
+          amountInput.value = detectedTotal.toFixed(2);
+          amountInput.classList.add('input-glow-success');
+          setTimeout(() => amountInput.classList.remove('input-glow-success'), 3500);
+
+          badgeEl.innerHTML = `<span>✓</span> <span>Montant détecté</span>`;
+          badgeEl.style.color = "var(--accent-green)";
+          badgeEl.style.borderColor = "var(--accent-green)";
+
+          msgEl.className = "ocr-message success";
+          msgEl.innerHTML = `
+            <span>✓</span>
+            <span><strong>Montant détecté : ${formatDH(detectedTotal)}</strong> (pré-rempli, vérifiez et ajustez si besoin).</span>
+          `;
+        } else {
+          badgeEl.innerHTML = `<span>ℹ</span> <span>Saisie manuelle</span>`;
+          msgEl.className = "ocr-message notice";
+          msgEl.innerHTML = `
+            <span>ℹ️</span>
+            <span>Montant non identifié avec certitude. Veuillez saisir le montant du ticket.</span>
+          `;
+          amountInput.focus();
+        }
+      } catch (err) {
+        console.warn("Échec lecture OCR:", err);
+        badgeEl.innerHTML = `<span>ℹ</span> <span>Saisie manuelle</span>`;
+        msgEl.className = "ocr-message notice";
+        msgEl.innerHTML = `
+          <span>ℹ️</span>
+          <span>Lecture automatique non disponible. Vous pouvez saisir le montant manuellement.</span>
+        `;
+      }
+    }
+
     // Gestion sélection et compression photo
     window.handlePhotoSelect = async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
+      currentRawPhotoFile = file;
       const hintText = document.getElementById('upload-hint-text');
-      hintText.textContent = "Compression de la photo...";
+      hintText.textContent = "Traitement de la photo...";
 
       try {
-        selectedCompressedPhoto = await compressImage(file, 900, 0.6);
+        selectedCompressedPhoto = await compressImage(file, 1000, 0.65);
         const previewImg = document.getElementById('preview-img');
         previewImg.src = selectedCompressedPhoto;
         document.getElementById('preview-box').style.display = 'block';
         document.getElementById('upload-zone').style.display = 'none';
+
+        // Lancement immédiat de la lecture automatique du montant
+        runAutoOcrScan(file);
       } catch (err) {
         console.error("Compression error:", err);
         showCmdAlert("Impossible de traiter cette photo. Veuillez réessayer.");
@@ -1406,14 +1695,30 @@
       }
     };
 
+    window.rescanCurrentPhoto = (e) => {
+      if (e) e.stopPropagation();
+      if (currentRawPhotoFile) {
+        runAutoOcrScan(currentRawPhotoFile);
+      } else if (selectedCompressedPhoto) {
+        runAutoOcrScan(selectedCompressedPhoto);
+      }
+    };
+
     window.clearSelectedPhoto = (e) => {
       if (e) e.stopPropagation();
       selectedCompressedPhoto = null;
+      currentRawPhotoFile = null;
       document.getElementById('cmd-photo').value = '';
       document.getElementById('preview-img').src = '';
       document.getElementById('preview-box').style.display = 'none';
       document.getElementById('upload-zone').style.display = 'flex';
       document.getElementById('upload-hint-text').textContent = "Prendre en photo le ticket";
+
+      // Réinitialiser les messages OCR
+      const badgeEl = document.getElementById('ocr-status-badge');
+      const msgEl = document.getElementById('ocr-message');
+      if (badgeEl) badgeEl.classList.add('hidden');
+      if (msgEl) msgEl.classList.add('hidden');
     };
 
     // Envoi de commande ticket (atomique avec writeBatch)

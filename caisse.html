@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <!-- Lecteur OCR Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --bg: #14120f;
@@ -856,6 +858,55 @@
       to { transform: rotate(360deg); }
     }
 
+    .spinner-sm {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(195, 161, 91, 0.25);
+      border-top-color: var(--accent-brass);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .caisse-ocr-banner {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.4;
+      box-sizing: border-box;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .caisse-ocr-banner.scanning {
+      background: rgba(195, 161, 91, 0.12);
+      border: 1px solid rgba(195, 161, 91, 0.35);
+      color: var(--accent-brass);
+    }
+
+    .caisse-ocr-banner.match {
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(111, 174, 122, 0.5);
+      color: #9cd1a4;
+    }
+
+    .caisse-ocr-banner.mismatch {
+      background: rgba(196, 101, 90, 0.15);
+      border: 1px solid rgba(196, 101, 90, 0.5);
+      color: #e59086;
+    }
+
+    .caisse-ocr-banner.info {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
     .hidden {
       display: none !important;
     }
@@ -882,8 +933,17 @@
           </svg>
           <span id="zoom-label">Zoom</span>
         </button>
+        <button type="button" class="toolbar-btn" id="btn-ocr-caisse" onclick="runCaisseTicketOcr()" title="Lire le montant automatiquement (OCR)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+          </svg>
+          <span id="caisse-ocr-label">Lire Total (OCR)</span>
+        </button>
         <button type="button" class="toolbar-btn toolbar-close" onclick="closeTicketModal()" title="Fermer (Échap)">✕</button>
       </div>
+
+      <div id="caisse-ocr-result" class="caisse-ocr-banner hidden"></div>
 
       <div class="modal-img-container" id="modal-img-container">
         <div id="ticket-loader" style="color: var(--accent-brass); display: flex; flex-direction: column; align-items: center; gap: 10px;">
@@ -1454,7 +1514,7 @@
         const clientName = clientObj ? (clientObj.nom || clientObj.username) : `Client (${t.clientId.slice(0, 6)}...)`;
 
         const ticketBtnHtml = t.hasTicket ? `
-          <button type="button" class="btn-action btn-ticket" onclick="openTicketModal('${escapeHtml(t.id)}')">
+          <button type="button" class="btn-action btn-ticket" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -1629,7 +1689,7 @@
           : '<span class="badge badge-attente">En attente</span>';
 
         const ticketBtn = t.hasTicket ? `
-          <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}')">
+          <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -1787,9 +1847,12 @@
       }
     };
 
-    // Modal Visualisation Ticket avec rotation et zoom
+    // Modal Visualisation Ticket avec rotation, zoom et lecteur OCR
     let currentTicketRotation = 0;
     let isTicketZoomed = false;
+    let currentTicketTransId = null;
+    let currentExpectedAmount = 0;
+    let currentTicketDataUrl = null;
 
     window.rotateTicket = () => {
       currentTicketRotation = (currentTicketRotation + 90) % 360;
@@ -1810,10 +1873,176 @@
       img.style.transform = `rotate(${currentTicketRotation}deg) scale(${scale})`;
     }
 
-    window.openTicketModal = async (transId) => {
+    // Prétraitement de l'image pour OCR Caisse
+    function prepareTicketForOcr(dataUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          try {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            for (let i = 0; i < d.length; i += 4) {
+              const lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              const factor = 1.35;
+              let v = factor * (lum - 128) + 128;
+              v = Math.max(0, Math.min(255, v));
+              d[i] = v;
+              d[i + 1] = v;
+              d[i + 2] = v;
+            }
+            ctx.putImageData(imgData, 0, 0);
+          } catch (e) {
+            console.warn("Filtre canvas OCR ignoré:", e);
+          }
+          resolve(canvas);
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    // Extraction robuste du montant Total TTC
+    function parseTotalFromReceiptText(text) {
+      if (!text) return null;
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+      const patterns = [
+        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global|payer)?\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /total\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /total.*?([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global)?\s*[:=\s]*([0-9]{1,5})(?:\s*dh|\s*mad)?$/i
+      ];
+
+      for (const line of lines) {
+        for (const regex of patterns) {
+          const match = line.match(regex);
+          if (match && match[1]) {
+            const clean = match[1].replace(/\s/g, '').replace(',', '.');
+            const num = parseFloat(clean);
+            if (!isNaN(num) && num > 0 && num < 100000) {
+              return num;
+            }
+          }
+        }
+      }
+
+      const fullText = text.replace(/\r/g, ' ');
+      const totalIdx = fullText.toLowerCase().lastIndexOf('total');
+      if (totalIdx !== -1) {
+        const snippet = fullText.slice(totalIdx, totalIdx + 120);
+        const m = snippet.match(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/);
+        if (m && m[1]) {
+          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
+          if (!isNaN(num) && num > 0) return num;
+        }
+      }
+
+      const candidateNumbers = [];
+      const bottomLines = lines.slice(Math.max(0, lines.length - 8));
+      for (const line of bottomLines) {
+        if (/tel|wifi|ice/i.test(line)) continue;
+        const matches = line.matchAll(/([0-9]{1,5}[.,][0-9]{2})/g);
+        for (const m of matches) {
+          const num = parseFloat(m[1].replace(',', '.'));
+          if (!isNaN(num) && num > 0 && num < 50000) {
+            candidateNumbers.push(num);
+          }
+        }
+      }
+
+      if (candidateNumbers.length > 0) {
+        return Math.max(...candidateNumbers);
+      }
+
+      return null;
+    }
+
+    window.runCaisseTicketOcr = async () => {
+      const banner = document.getElementById('caisse-ocr-result');
+      const label = document.getElementById('caisse-ocr-label');
+      if (!currentTicketDataUrl) return;
+
+      banner.className = "caisse-ocr-banner scanning";
+      banner.innerHTML = `<span class="spinner-sm"></span> <span>Lecture OCR du ticket en cours...</span>`;
+      banner.classList.remove('hidden');
+      if (label) label.textContent = "Lecture...";
+
+      try {
+        if (typeof Tesseract === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
+            document.head.appendChild(s);
+          });
+        }
+
+        const processedCanvas = await prepareTicketForOcr(currentTicketDataUrl);
+        const worker = await Tesseract.createWorker('eng');
+        const ret = await worker.recognize(processedCanvas);
+        await worker.terminate();
+
+        const rawText = ret && ret.data && ret.data.text ? ret.data.text : '';
+        console.log("Texte extrait (Caisse OCR) :", rawText);
+
+        const detectedTotal = parseTotalFromReceiptText(rawText);
+
+        if (detectedTotal && detectedTotal > 0) {
+          const diff = Math.abs(detectedTotal - (currentExpectedAmount || 0));
+          if (currentExpectedAmount > 0 && diff < 0.05) {
+            banner.className = "caisse-ocr-banner match";
+            banner.innerHTML = `<span>✓</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong> — Correspond exactement au montant déclaré (${formatDH(currentExpectedAmount)}).</span>`;
+          } else if (currentExpectedAmount > 0) {
+            banner.className = "caisse-ocr-banner mismatch";
+            banner.innerHTML = `<span>⚠️</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong> — Attention : montant déclaré par le client = ${formatDH(currentExpectedAmount)}.</span>`;
+          } else {
+            banner.className = "caisse-ocr-banner match";
+            banner.innerHTML = `<span>✓</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong></span>`;
+          }
+        } else {
+          banner.className = "caisse-ocr-banner info";
+          banner.innerHTML = `<span>ℹ️</span> <span>Montant non identifié avec certitude sur la photo. Contrôle visuel requis.</span>`;
+        }
+      } catch (err) {
+        console.warn("Erreur OCR caisse:", err);
+        banner.className = "caisse-ocr-banner info";
+        banner.innerHTML = `<span>ℹ️</span> <span>Lecture OCR indisponible sur cet appareil. Contrôle visuel direct.</span>`;
+      } finally {
+        if (label) label.textContent = "Relire (OCR)";
+      }
+    };
+
+    window.openTicketModal = async (transId, expectedAmount = 0) => {
       const modal = document.getElementById('ticket-modal');
       const loader = document.getElementById('ticket-loader');
       const img = document.getElementById('modal-ticket-img');
+      const ocrBanner = document.getElementById('caisse-ocr-result');
+      const ocrLabel = document.getElementById('caisse-ocr-label');
+
+      currentTicketTransId = transId;
+      currentExpectedAmount = Number(expectedAmount) || 0;
+      currentTicketDataUrl = null;
+      if (ocrBanner) ocrBanner.classList.add('hidden');
+      if (ocrLabel) ocrLabel.textContent = "Lire Total (OCR)";
 
       currentTicketRotation = 0;
       isTicketZoomed = false;
@@ -1829,6 +2058,7 @@
       try {
         const snap = await getDoc(doc(db, 'tickets', transId));
         if (snap.exists() && snap.data().img) {
+          currentTicketDataUrl = snap.data().img;
           img.src = snap.data().img;
           img.onload = () => {
             loader.style.display = 'none';
@@ -1850,6 +2080,9 @@
       if (img) img.src = '';
       currentTicketRotation = 0;
       isTicketZoomed = false;
+      currentTicketDataUrl = null;
+      const ocrBanner = document.getElementById('caisse-ocr-result');
+      if (ocrBanner) ocrBanner.classList.add('hidden');
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = 'Zoom';
     };
