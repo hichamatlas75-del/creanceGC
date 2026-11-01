@@ -221,6 +221,93 @@
       transform: translateY(-1px);
     }
 
+    .btn-whatsapp-sm {
+      background: rgba(37, 211, 102, 0.1);
+      border: 1px solid rgba(37, 211, 102, 0.3);
+      color: #15803d;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+
+    .btn-whatsapp-sm:hover {
+      background: #25D366;
+      color: #ffffff;
+      border-color: #25D366;
+      transform: translateY(-1px);
+    }
+
+    /* Carte Partage WhatsApp */
+    .share-whatsapp-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .share-whatsapp-card:hover {
+      border-color: rgba(37, 211, 102, 0.4);
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.09);
+    }
+
+    .share-whatsapp-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .share-whatsapp-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-ivory);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .share-whatsapp-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .btn-share-whatsapp {
+      background: #25D366;
+      color: #ffffff;
+      border: none;
+      padding: 9px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-share-whatsapp:hover,
+    .btn-share-whatsapp:active {
+      background: #20ba59;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+    }
+
     /* Conteneur principal */
     main {
       flex: 1;
@@ -1615,6 +1702,23 @@
             </div>
           </div>
         </div>
+
+        <!-- Étape 6 -->
+        <div class="guide-step-card" style="border-color: rgba(37, 211, 102, 0.4); background: rgba(37, 211, 102, 0.04);">
+          <div class="guide-step-icon" style="background: rgba(37, 211, 102, 0.12); color: #16a34a;">💬</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title" style="color: #15803d;">6. Partager l'accès via WhatsApp</div>
+            <div class="guide-step-desc">
+              Envoyez le lien d'accès à vos amis ou proches en 1 clic pour qu'ils ouvrent leur compte.
+            </div>
+            <button type="button" class="btn-share-whatsapp" style="margin-top: 8px; padding: 6px 12px; font-size: 12px;" onclick="shareViaWhatsApp()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.45 0-2.87-.38-4.12-1.1l-.3-.17-3.12.82.83-3.04-.19-.31a8.21 8.21 0 0 1-1.26-4.44c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.23.9 2.43 1.02 2.6.13.16 1.77 2.7 4.29 3.79.6.26 1.07.41 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29z"/>
+              </svg>
+              <span>Envoyer sur WhatsApp</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <button type="button" class="btn" style="margin-top: 18px; width: 100%;" onclick="closeGuideModal()">J'ai compris</button>
@@ -1706,9 +1810,15 @@
           Accès personnel de caisse : <strong style="color: var(--accent-brass);">Espace Caisse →</strong>
         </a>
       </div>
-      <div style="text-align: center; margin-top: 10px;">
+      <div style="text-align: center; margin-top: 12px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
         <a href="javascript:void(0)" onclick="openGuideModal()" style="color: var(--accent-brass); font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
-          <span>📖</span> <span style="text-decoration: underline;">Guide d'utilisation client</span>
+          <span>📖</span> <span style="text-decoration: underline;">Guide client</span>
+        </a>
+        <a href="javascript:void(0)" onclick="shareViaWhatsApp()" style="color: #15803d; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.45 0-2.87-.38-4.12-1.1l-.3-.17-3.12.82.83-3.04-.19-.31a8.21 8.21 0 0 1-1.26-4.44c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.23.9 2.43 1.02 2.6.13.16 1.77 2.7 4.29 3.79.6.26 1.07.41 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29z"/>
+          </svg>
+          <span style="text-decoration: underline;">Partager sur WhatsApp</span>
         </a>
       </div>
     </div>
@@ -1724,6 +1834,12 @@
         </div>
         <div class="user-pill">
           <span class="user-name" id="user-display-name">-</span>
+          <button type="button" class="btn-whatsapp-sm" onclick="shareViaWhatsApp()" title="Partager sur WhatsApp">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.45 0-2.87-.38-4.12-1.1l-.3-.17-3.12.82.83-3.04-.19-.31a8.21 8.21 0 0 1-1.26-4.44c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.23.9 2.43 1.02 2.6.13.16 1.77 2.7 4.29 3.79.6.26 1.07.41 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29z"/>
+            </svg>
+            Partager
+          </button>
           <button type="button" class="btn-help" onclick="openGuideModal()" title="Guide d'utilisation">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <circle cx="12" cy="12" r="10"></circle>
@@ -1762,6 +1878,23 @@
           </svg>
           <span>Pour alimenter votre solde, faites un dépôt à la caisse. <a href="javascript:void(0)" onclick="openGuideModal()" style="color: var(--accent-brass); font-weight: 600; text-decoration: underline; margin-left: 3px;">Comment ça marche ?</a></span>
         </div>
+      </section>
+
+      <!-- Carte Partage WhatsApp -->
+      <section class="share-whatsapp-card">
+        <div class="share-whatsapp-text">
+          <div class="share-whatsapp-title">
+            <span>Partager l'application</span>
+          </div>
+          <div class="share-whatsapp-sub">Transmettez le lien d'accès à vos amis ou collègues</div>
+        </div>
+        <button type="button" class="btn-share-whatsapp" onclick="shareViaWhatsApp()" title="Partager sur WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.45 0-2.87-.38-4.12-1.1l-.3-.17-3.12.82.83-3.04-.19-.31a8.21 8.21 0 0 1-1.26-4.44c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.23.9 2.43 1.02 2.6.13.16 1.77 2.7 4.29 3.79.6.26 1.07.41 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29z"/>
+          </svg>
+          <span>WhatsApp</span>
+        </button>
+      </section>
       </section>
 
       <!-- Carte 2 : Nouvelle commande -->
@@ -2899,6 +3032,16 @@
         modal.style.display = 'none';
         modal.classList.add('hidden');
       }
+    };
+
+    // Partage de l'application via WhatsApp
+    window.shareViaWhatsApp = () => {
+      const origin = window.location.origin;
+      const cleanPath = window.location.pathname.replace(/\/creance\.html$/, '/index.html');
+      const shareUrl = origin + cleanPath;
+      const message = `👋 Bonjour ! Voici le lien direct pour accéder à votre espace client Grey Corner (suivi de solde, enregistrement des tickets de commande et historique) :\n\n👉 ${shareUrl}`;
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
     };
 
     // Fermeture avec touche Échap
