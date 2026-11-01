@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Grey Corner — Créances Client</title>
+  <title>Grey Corner Café — Espace Client Privilège</title>
 
   <!-- PWA & WebManifest (Android & Modern Browsers) -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -28,23 +28,31 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
   <link rel="shortcut icon" href="favicon.ico">
 
-  <!-- Balises Open Graph / WhatsApp / Facebook Rich Preview -->
+  <!-- Balises Open Graph / WhatsApp / Facebook Rich Preview (URLs Absolues requises pour WhatsApp) -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Grey Corner Café">
-  <meta property="og:title" content="☕ Grey Corner Café — Espace Client Privilège">
+  <meta property="og:title" content="Grey Corner Café — Espace Client Privilège">
   <meta property="og:description" content="Suivi en direct de votre solde, vos commandes et vos tickets au Grey Corner Café.">
-  <meta property="og:image" content="assets/og-image.jpg">
-  <meta property="og:image:secure_url" content="assets/og-image.jpg">
+  <meta property="og:url" content="https://creancegc.pages.dev/">
+  <meta property="og:image" content="https://creancegc.pages.dev/assets/og-image-square.jpg">
+  <meta property="og:image:secure_url" content="https://creancegc.pages.dev/assets/og-image-square.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="800">
+  <meta property="og:image:alt" content="Grey Corner Café — Logo Officiel & Espace Privilège">
+  <meta property="og:image" content="https://creancegc.pages.dev/assets/og-image.jpg">
+  <meta property="og:image:secure_url" content="https://creancegc.pages.dev/assets/og-image.jpg">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Grey Corner Café — Espace Client">
 
-  <!-- Twitter Card -->
+  <!-- Balises Twitter Card & Fallbacks Réseaux Sociaux -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="☕ Grey Corner Café — Espace Client Privilège">
+  <meta name="twitter:title" content="Grey Corner Café — Espace Client Privilège">
   <meta name="twitter:description" content="Suivi en direct de votre solde, vos commandes et vos tickets au Grey Corner Café.">
-  <meta name="twitter:image" content="assets/og-image.jpg">
+  <meta name="twitter:image" content="https://creancegc.pages.dev/assets/og-image.jpg">
+  <link rel="image_src" href="https://creancegc.pages.dev/assets/og-image-square.jpg">
+  <link rel="canonical" href="https://creancegc.pages.dev/">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3087,11 +3095,13 @@
       }
     };
 
-    // Partage de l'application via WhatsApp avec message luxe et lien direct
-    window.shareViaWhatsApp = () => {
+    // Partage de l'application via WhatsApp avec image intégrée (Web Share API) ou lien enrichi
+    window.shareViaWhatsApp = async () => {
       const origin = window.location.origin;
       const cleanPath = window.location.pathname.replace(/\/creance\.html$/, '/index.html');
-      const shareUrl = origin + cleanPath;
+      const baseShareUrl = (origin && origin.startsWith('http')) ? `${origin}${cleanPath}` : 'https://creancegc.pages.dev/index.html';
+      // Versioning URL (?v=gc2) pour forcer WhatsApp à rafraîchir immédiatement son cache d'aperçu d'image
+      const shareUrl = `${baseShareUrl}?v=gc2`;
       const message = 
 `☕ *GREY CORNER CAFÉ*
 ✨ _Espace Client Privilège_
@@ -3107,6 +3117,30 @@ ${shareUrl}
 
 _Pensez à ajouter l'application sur votre écran d'accueil pour y accéder en 1 clic !_`;
 
+      // 1. Essai Partage Natif avec fichier image (Web Share API Level 2)
+      // Sur smartphone (Android & iOS), cela transmet directement la VRAIE IMAGE dans WhatsApp avec le texte en légende !
+      if (navigator.share && navigator.canShare) {
+        try {
+          const imgResp = await fetch('assets/og-image.jpg');
+          if (imgResp.ok) {
+            const blob = await imgResp.blob();
+            const file = new File([blob], 'grey-corner-cafe.jpg', { type: 'image/jpeg' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: 'Grey Corner Café — Espace Client Privilège',
+                text: message,
+                files: [file]
+              });
+              return;
+            }
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') return; // Annulation volontaire par l'utilisateur
+          console.warn('[Share] Partage natif avec image non supporté, bascule vers wa.me:', err);
+        }
+      }
+
+      // 2. Repli WhatsApp direct (wa.me) avec aperçu Open Graph
       const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
     };
