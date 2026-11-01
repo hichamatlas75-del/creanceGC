@@ -1851,10 +1851,9 @@
       const email = (user.email || '').toLowerCase();
       const usernameFromEmail = email.replace('@greycorner.app', '');
 
-      // 1. Détection compte caisse sur l'espace client
+      // 1. Détection compte caisse sur l'espace client : redirection automatique sans déconnexion
       if (usernameFromEmail === 'caisse') {
-        await signOut(auth);
-        showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
+        window.location.href = 'caisse.html';
         return;
       }
 
@@ -1869,8 +1868,7 @@
         if (snap.exists()) {
           profile = snap.data();
           if (profile.role === 'caisse') {
-            await signOut(auth);
-            showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
+            window.location.href = 'caisse.html';
             return;
           }
         } else {
@@ -2606,6 +2604,18 @@
             if (desc) desc.textContent = "Installer sur l'écran d'accueil iPhone en 2 étapes.";
             banner.classList.remove('hidden');
           }
+        }
+      }
+    });
+
+    // Navigation interne fluide en mode PWA Standalone (évite de quitter la PWA vers Safari)
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (a && a.href && a.origin === window.location.origin) {
+        const target = a.getAttribute('target');
+        if (!target || target === '_self') {
+          e.preventDefault();
+          window.location.href = a.href;
         }
       }
     });

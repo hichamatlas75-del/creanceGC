@@ -1436,10 +1436,10 @@
         initRealtimeListeners();
       } else {
         const deniedUid = user.uid;
-        await signOut(auth);
         document.getElementById('login-box').classList.add('hidden');
         document.getElementById('denied-uid-text').textContent = deniedUid;
         document.getElementById('denied-box').classList.remove('hidden');
+        // Ne pas exécuter signOut automatiquement pour laisser le message d'accès restreint visible
       }
     }
 
@@ -2306,6 +2306,18 @@
         });
       });
     }
+
+    // Navigation interne fluide en mode PWA Standalone (évite de quitter la PWA vers Safari)
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (a && a.href && a.origin === window.location.origin) {
+        const target = a.getAttribute('target');
+        if (!target || target === '_self') {
+          e.preventDefault();
+          window.location.href = a.href;
+        }
+      }
+    });
   </script>
 </body>
 </html>
