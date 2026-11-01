@@ -1,5 +1,15 @@
 {
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firestore.rules",
+      "creance-firestore.rules.txt",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
