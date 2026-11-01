@@ -1196,36 +1196,59 @@
 
     // Chargement du profil et validation rôle
     async function loadUserProfile(user) {
+      const email = (user.email || '').toLowerCase();
+      const usernameFromEmail = email.replace('@greycorner.app', '');
+
+      // 1. Détection compte caisse sur l'espace client
+      if (usernameFromEmail === 'caisse') {
+        await signOut(auth);
+        showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
+        return;
+      }
+
+      let profile = {
+        username: usernameFromEmail,
+        nom: usernameFromEmail,
+        role: 'client'
+      };
+
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if (!snap.exists()) {
-          await signOut(auth);
-          showAuthAlert("Compte sans profil.");
-          return;
+        if (snap.exists()) {
+          profile = snap.data();
+          if (profile.role === 'caisse') {
+            await signOut(auth);
+            showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
+            return;
+          }
+        } else {
+          // Document users/{uid} inexistant : on l'initialise automatiquement
+          try {
+            await setDoc(doc(db, 'users', user.uid), {
+              username: usernameFromEmail,
+              nom: usernameFromEmail,
+              role: 'client',
+              createdAt: Date.now()
+            });
+          } catch (writeErr) {
+            console.warn("Auto-create profile write notice:", writeErr);
+          }
         }
-
-        const profile = snap.data();
-        if (profile.role === 'caisse') {
-          await signOut(auth);
-          showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
-          return;
-        }
-
-        currentUser = user;
-        currentUserProfile = profile;
-
-        // Afficher l'application client
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-screen').classList.remove('hidden');
-        document.getElementById('user-display-name').textContent = profile.nom || profile.username || 'Client';
-
-        // Écouteur temps réel sur les transactions
-        subscribeTransactions(user.uid);
       } catch (err) {
-        console.error("Profile load error:", err);
-        await signOut(auth);
-        showAuthAlert("Erreur lors du chargement du profil.");
+        console.warn("Profile read notice (quota/network):", err);
+        // Ne PAS déconnecter l'utilisateur si la lecture de Firestore est ralentie ou en quota !
       }
+
+      currentUser = user;
+      currentUserProfile = profile;
+
+      // Afficher l'application client
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('app-screen').classList.remove('hidden');
+      document.getElementById('user-display-name').textContent = profile.nom || profile.username || usernameFromEmail || 'Client';
+
+      // Écouteur temps réel sur les transactions
+      subscribeTransactions(user.uid);
     }
 
     // Écouteur d'état Auth
@@ -1292,7 +1315,7 @@
 
         renderHistory(list);
       }, (error) => {
-        console.error("Snapshot error:", error);
+        console.warn("Snapshot notice:", error);
       });
     }
 

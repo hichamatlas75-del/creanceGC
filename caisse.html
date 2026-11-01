@@ -1301,37 +1301,33 @@
 
     // Vérification du rôle caisse
     async function checkCaisseAccess(user) {
+      const email = (user.email || '').toLowerCase();
+      const isMasterCaisse = email.startsWith('caisse@');
+
+      let roleIsCaisse = isMasterCaisse;
+
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if (!snap.exists()) {
-          await signOut(auth);
-          showAuthAlert("Compte sans profil.");
-          return;
+        if (snap.exists()) {
+          const profile = snap.data();
+          roleIsCaisse = (profile.role === 'caisse') || isMasterCaisse;
         }
+      } catch (err) {
+        console.warn("Caisse check notice (quota/network):", err);
+      }
 
-        const profile = snap.data();
-        if (profile.role !== 'caisse') {
-          const deniedUid = user.uid;
-          await signOut(auth);
-          // Affichage de l'écran "Accès caisse refusé" avec l'UID
-          document.getElementById('login-box').classList.add('hidden');
-          document.getElementById('denied-uid-text').textContent = deniedUid;
-          document.getElementById('denied-box').classList.remove('hidden');
-          return;
-        }
-
+      if (roleIsCaisse) {
         currentCaisseUser = user;
-
         // Afficher dashboard caisse
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
-
-        // Démarrer les écoutes temps réel
         initRealtimeListeners();
-      } catch (err) {
-        console.error("Caisse check error:", err);
+      } else {
+        const deniedUid = user.uid;
         await signOut(auth);
-        showAuthAlert("Erreur de vérification des droits : " + err.message);
+        document.getElementById('login-box').classList.add('hidden');
+        document.getElementById('denied-uid-text').textContent = deniedUid;
+        document.getElementById('denied-box').classList.remove('hidden');
       }
     }
 
@@ -1370,7 +1366,7 @@
 
         recomputeAndRender();
       }, (err) => {
-        console.error("Users snapshot error:", err);
+        console.warn("Users snapshot notice:", err);
       });
 
       // 2. Écoute de la collection transactions
@@ -1383,7 +1379,7 @@
 
         recomputeAndRender();
       }, (err) => {
-        console.error("Transactions snapshot error:", err);
+        console.warn("Transactions snapshot notice:", err);
       });
     }
 
