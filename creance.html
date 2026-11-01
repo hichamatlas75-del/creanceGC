@@ -608,9 +608,73 @@
       transition: all 0.2s;
     }
 
+    .btn-ticket-sm {
+      background: rgba(195, 161, 91, 0.12);
+      color: var(--accent-brass);
+      border: 1px solid rgba(195, 161, 91, 0.35);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
     .btn-ticket-sm:hover {
-      background: rgba(195, 161, 91, 0.2);
+      background: rgba(195, 161, 91, 0.25);
       border-color: var(--accent-brass);
+      color: #fff;
+    }
+
+    .history-filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .history-filter-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .history-filter-btn.active {
+      background: var(--bg-card);
+      color: var(--accent-brass);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(195, 161, 91, 0.3);
+    }
+
+    .history-filter-badge {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .history-filter-btn.active .history-filter-badge {
+      background: rgba(195, 161, 91, 0.2);
+      color: var(--accent-brass);
     }
 
     .empty-state {
@@ -835,6 +899,10 @@
   <div id="ticket-modal" class="modal-overlay" onclick="closeTicketModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div class="modal-toolbar">
+        <div id="modal-ticket-info" style="margin-right: auto; display: flex; align-items: baseline; gap: 8px;">
+          <span id="modal-ticket-date" style="font-size: 11px; color: var(--text-muted);"></span>
+          <span id="modal-ticket-amount" style="font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--accent-brass);"></span>
+        </div>
         <button type="button" class="toolbar-btn" onclick="rotateTicket()" title="Pivoter 90°">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
@@ -999,11 +1067,22 @@
         </form>
       </section>
 
-      <!-- Carte 3 : Historique -->
+      <!-- Carte 3 : Historique & Tickets -->
       <section class="card">
         <div class="card-title">
-          <span>Historique</span>
+          <span>Historique & Tickets</span>
           <span id="history-count" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 mouvement</span>
+        </div>
+
+        <div class="history-filter-bar">
+          <button type="button" class="history-filter-btn active" id="filter-btn-all" onclick="setHistoryFilter('all')">
+            <span>Tous les mouvements</span>
+            <span id="count-all" class="history-filter-badge">0</span>
+          </button>
+          <button type="button" class="history-filter-btn" id="filter-btn-tickets" onclick="setHistoryFilter('tickets')">
+            <span>📷 Mes tickets</span>
+            <span id="count-tickets" class="history-filter-badge">0</span>
+          </button>
         </div>
 
         <div id="history-container" class="history-list">
@@ -1410,33 +1489,64 @@
         // Tri côté client par createdAt décroissant (pas d'index composite requis)
         list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-        renderHistory(list);
+        cachedTransactionsList = list;
+        renderHistory();
       }, (error) => {
         console.warn("Snapshot notice:", error);
       });
     }
 
-    // Rendu de l'historique
-    function renderHistory(items) {
+    // Filtre & Rendu de l'historique et des tickets
+    let currentHistoryFilter = 'all'; // 'all' | 'tickets'
+    let cachedTransactionsList = [];
+
+    window.setHistoryFilter = (filter) => {
+      currentHistoryFilter = filter;
+      const btnAll = document.getElementById('filter-btn-all');
+      const btnTickets = document.getElementById('filter-btn-tickets');
+      if (btnAll) btnAll.classList.toggle('active', filter === 'all');
+      if (btnTickets) btnTickets.classList.toggle('active', filter === 'tickets');
+      renderHistory();
+    };
+
+    function renderHistory() {
       const container = document.getElementById('history-container');
       const countEl = document.getElementById('history-count');
-      countEl.textContent = `${items.length} mouvement${items.length > 1 ? 's' : ''}`;
+      const countAllEl = document.getElementById('count-all');
+      const countTicketsEl = document.getElementById('count-tickets');
+
+      const allItems = cachedTransactionsList;
+      const ticketItems = allItems.filter(item => item.hasTicket);
+
+      if (countAllEl) countAllEl.textContent = allItems.length;
+      if (countTicketsEl) countTicketsEl.textContent = ticketItems.length;
+
+      const items = currentHistoryFilter === 'tickets' ? ticketItems : allItems;
+      countEl.textContent = `${items.length} ${currentHistoryFilter === 'tickets' ? 'ticket' : 'mouvement'}${items.length > 1 ? 's' : ''}`;
 
       if (items.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.
-          </div>
-        `;
+        if (currentHistoryFilter === 'tickets') {
+          container.innerHTML = `
+            <div class="empty-state">
+              📷 Aucun ticket pour le moment.<br>Lorsque vous envoyez un ticket avec sa photo, il apparaîtra ici.
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.
+            </div>
+          `;
+        }
         return;
       }
 
       let html = '';
       items.forEach((item) => {
         const isDepot = item.type === 'depot';
-        const typeLabel = isDepot ? 'Dépôt caisse' : 'Commande ticket';
+        const typeLabel = isDepot ? 'Dépôt caisse' : (item.hasTicket ? 'Commande avec ticket' : 'Commande caisse');
         const sign = isDepot ? '+' : '−';
-        const iconSymbol = isDepot ? '+' : '−';
+        const iconSymbol = isDepot ? '+' : (item.hasTicket ? '📷' : '−');
         const cls = isDepot ? 'depot' : 'commande';
 
         let badgeLabel = 'Validé';
@@ -1449,29 +1559,37 @@
           badgeCls = 'rejete';
         }
 
+        const dateStr = formatDate(item.createdAt);
+        const amountStr = formatDH(item.montant);
+
         const ticketBtnHtml = item.hasTicket ? `
-          <button type="button" class="btn-ticket-sm" onclick="openTicketModal('${escapeHtml(item.id)}')">
+          <button type="button" class="btn-ticket-sm" onclick="event.stopPropagation(); openTicketModal('${escapeHtml(item.id)}', '${escapeHtml(dateStr)}', '${escapeHtml(amountStr)}')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
               <polyline points="21 15 16 10 5 21"></polyline>
             </svg>
-            Ticket
+            Voir ticket
           </button>
         ` : '';
 
+        const itemClick = item.hasTicket
+          ? `onclick="openTicketModal('${escapeHtml(item.id)}', '${escapeHtml(dateStr)}', '${escapeHtml(amountStr)}')"`
+          : '';
+        const cursorStyle = item.hasTicket ? 'cursor: pointer;' : '';
+
         html += `
-          <div class="history-item">
+          <div class="history-item" ${itemClick} style="${cursorStyle}">
             <div class="history-left">
               <div class="history-icon ${cls}">${iconSymbol}</div>
               <div class="history-details">
                 <div class="history-title">${escapeHtml(typeLabel)}</div>
-                <div class="history-date">${escapeHtml(formatDate(item.createdAt))}</div>
+                <div class="history-date">${escapeHtml(dateStr)}</div>
                 <span class="history-badge ${badgeCls}">${badgeLabel}</span>
               </div>
             </div>
             <div class="history-right">
-              <div class="history-amount ${cls}">${sign}${escapeHtml(formatDH(item.montant))}</div>
+              <div class="history-amount ${cls}">${sign}${escapeHtml(amountStr)}</div>
               ${ticketBtnHtml}
             </div>
           </div>
@@ -1819,10 +1937,15 @@
     }
 
     // Visualisation du ticket en grand
-    window.openTicketModal = async (transId) => {
+    window.openTicketModal = async (transId, dateStr = '', amountStr = '') => {
       const modal = document.getElementById('ticket-modal');
       const loader = document.getElementById('modal-loader');
       const img = document.getElementById('modal-img');
+      const dateEl = document.getElementById('modal-ticket-date');
+      const amountEl = document.getElementById('modal-ticket-amount');
+
+      if (dateEl) dateEl.textContent = dateStr ? `Ticket du ${dateStr}` : 'Ticket';
+      if (amountEl) amountEl.textContent = amountStr ? `${amountStr}` : '';
 
       currentTicketRotation = 0;
       isTicketZoomed = false;
