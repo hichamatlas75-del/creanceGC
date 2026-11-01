@@ -198,6 +198,28 @@
       transform: translateY(-1px);
     }
 
+    .btn-help {
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      color: var(--accent-brass);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+
+    .btn-help:hover {
+      background: var(--accent-brass);
+      color: #ffffff;
+      border-color: var(--accent-brass);
+      transform: translateY(-1px);
+    }
+
     /* Conteneur principal */
     main {
       flex: 1;
@@ -1275,6 +1297,146 @@
       line-height: 1.45;
     }
 
+    /* Modal Guide d'utilisation */
+    .guide-modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px 20px;
+      max-width: 520px;
+      width: 92%;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .guide-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .guide-modal-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-brass);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-modal-close {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      font-size: 16px;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .guide-modal-close:hover {
+      background: var(--accent-brass);
+      color: #ffffff;
+      border-color: var(--accent-brass);
+    }
+
+    .guide-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .guide-step-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: var(--transition);
+    }
+
+    .guide-step-card:hover {
+      border-color: rgba(37, 99, 235, 0.35);
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .guide-step-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(37, 99, 235, 0.09);
+      color: var(--accent-brass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .guide-step-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .guide-step-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-ivory);
+      margin-bottom: 3px;
+    }
+
+    .guide-step-desc {
+      font-size: 12px;
+      color: var(--text-soft);
+      line-height: 1.45;
+    }
+
+    .guide-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      margin: 2px 3px 0 0;
+    }
+
+    .guide-badge-pill.green {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green-border);
+    }
+
+    .guide-badge-pill.amber {
+      background: var(--accent-amber-bg);
+      color: var(--accent-amber);
+      border: 1px solid var(--accent-amber-border);
+    }
+
+    .guide-badge-pill.red {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red-border);
+    }
+
     .hidden {
       display: none !important;
     }
@@ -1340,6 +1502,84 @@
         </div>
       </div>
       <button type="button" class="btn" style="margin-top: 16px;" onclick="closeIosModal()">J'ai compris</button>
+    </div>
+  </div>
+
+  <!-- MODAL GUIDE D'UTILISATION CLIENT -->
+  <div id="guide-modal" class="modal-overlay hidden" style="display: none;" onclick="closeGuideModal(event)">
+    <div class="guide-modal-card" onclick="event.stopPropagation()">
+      <div class="guide-modal-header">
+        <div class="guide-modal-title">
+          <span>📖 Guide d'utilisation</span>
+        </div>
+        <button type="button" class="guide-modal-close" onclick="closeGuideModal()" title="Fermer (Échap)">✕</button>
+      </div>
+
+      <div class="guide-steps-list">
+        <!-- Étape 1 -->
+        <div class="guide-step-card">
+          <div class="guide-step-icon">💳</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title">1. Alimenter votre solde</div>
+            <div class="guide-step-desc">
+              Rendez-vous à la caisse pour effectuer un dépôt d'argent. Dès que le versement est validé en caisse, votre <strong>Solde Actuel</strong> se met à jour instantanément en direct sur votre écran.
+            </div>
+          </div>
+        </div>
+
+        <!-- Étape 2 -->
+        <div class="guide-step-card">
+          <div class="guide-step-icon">📷</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title">2. Enregistrer une commande avec ticket</div>
+            <div class="guide-step-desc">
+              Prenez en photo nette votre ticket de caisse. Le système scanne automatiquement le montant <em>Total</em> (OCR). Vérifiez ou ajustez le montant, puis validez votre commande.
+            </div>
+          </div>
+        </div>
+
+        <!-- Étape 3 -->
+        <div class="guide-step-card">
+          <div class="guide-step-icon">⏱️</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title">3. Suivre les statuts en direct</div>
+            <div class="guide-step-desc">
+              Chaque commande suit un cycle clair :
+              <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                <div><span class="guide-badge-pill amber">⏳ En attente</span> vérification par la caisse</div>
+                <div><span class="guide-badge-pill green">✓ Validé</span> commande validée et débitée du solde</div>
+                <div><span class="guide-badge-pill red">✕ Rejeté</span> ticket illisible ou montant incorrect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Étape 4 -->
+        <div class="guide-step-card">
+          <div class="guide-step-icon">🔍</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title">4. Retrouver & zoomer vos tickets</div>
+            <div class="guide-step-desc">
+              Dans la section <strong>Historique</strong>, filtrez sur <em>Tickets (avec photo)</em> pour retrouver n'importe quel reçu. Cliquez sur <strong>« Voir ticket »</strong> pour agrandir, pivoter à 90° et inspecter la photo.
+            </div>
+          </div>
+        </div>
+
+        <!-- Étape 5 -->
+        <div class="guide-step-card">
+          <div class="guide-step-icon">📲</div>
+          <div class="guide-step-content">
+            <div class="guide-step-title">5. Installer sur mobile (PWA)</div>
+            <div class="guide-step-desc">
+              Pour ouvrir l'application en 1 clic sans passer par le navigateur :<br>
+              • <strong>Android</strong> : touchez <em>« Installer »</em> en bas d'écran.<br>
+              • <strong>iPhone</strong> : touchez <em>Partager ⎋</em> puis <em>« Sur l'écran d'accueil ⊕ »</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn" style="margin-top: 18px; width: 100%;" onclick="closeGuideModal()">J'ai compris</button>
     </div>
   </div>
 
@@ -1423,9 +1663,14 @@
         </p>
       </form>
 
-      <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed rgba(58, 51, 41, 0.7);">
+      <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border);">
         <a href="caisse.html" style="color: var(--text-muted); font-size: 12px; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-brass)'" onmouseout="this.style.color='var(--text-muted)'">
           Accès personnel de caisse : <strong style="color: var(--accent-brass);">Espace Caisse →</strong>
+        </a>
+      </div>
+      <div style="text-align: center; margin-top: 10px;">
+        <a href="javascript:void(0)" onclick="openGuideModal()" style="color: var(--accent-brass); font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+          <span>📖</span> <span style="text-decoration: underline;">Guide d'utilisation client</span>
         </a>
       </div>
     </div>
@@ -1441,6 +1686,14 @@
         </div>
         <div class="user-pill">
           <span class="user-name" id="user-display-name">-</span>
+          <button type="button" class="btn-help" onclick="openGuideModal()" title="Guide d'utilisation">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Guide
+          </button>
           <button class="btn-quit" onclick="handleLogout()" title="Se déconnecter">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -1469,7 +1722,7 @@
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span>Pour alimenter votre solde, faites un dépôt à la caisse.</span>
+          <span>Pour alimenter votre solde, faites un dépôt à la caisse. <a href="javascript:void(0)" onclick="openGuideModal()" style="color: var(--accent-brass); font-weight: 600; text-decoration: underline; margin-left: 3px;">Comment ça marche ?</a></span>
         </div>
       </section>
 
@@ -2488,10 +2741,30 @@
       if (lbl) lbl.textContent = 'Zoom';
     };
 
+    // Guide d'utilisation client
+    window.openGuideModal = () => {
+      const modal = document.getElementById('guide-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+      }
+    };
+
+    window.closeGuideModal = (e) => {
+      if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('guide-modal-close') && !e.target.classList.contains('btn')) return;
+      const modal = document.getElementById('guide-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+      }
+    };
+
     // Fermeture avec touche Échap
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeTicketModal();
+        closeGuideModal();
+        if (typeof closeIosModal === 'function') closeIosModal();
       }
     });
 
