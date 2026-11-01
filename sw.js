@@ -3,7 +3,7 @@
    Version: 1.0.1 (Fix auth & Firebase Hosting bypass)
    ========================================================================== */
 
-const CACHE_NAME = 'grey-corner-cache-v4';
+const CACHE_NAME = 'grey-corner-cache-v5';
 
 const STATIC_ASSETS = [
   './',

@@ -121,39 +121,90 @@
       margin-top: 2px;
     }
 
-    .user-pill {
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       background: rgba(195, 161, 91, 0.08);
       border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .user-name {
       color: var(--accent-brass);
       font-weight: 600;
+      letter-spacing: 0.3px;
     }
 
     .btn-quit {
-      background: transparent;
-      border: none;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.25);
       color: var(--accent-red);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 6px;
+      justify-content: center;
+      gap: 5px;
+      height: 32px;
+      padding: 0 10px;
       border-radius: var(--radius-sm);
       transition: all 0.2s;
+      white-space: nowrap;
+      text-decoration: none;
+      box-sizing: border-box;
     }
 
-    .btn-quit:hover {
-      background: var(--accent-red-bg);
+    .btn-quit:hover,
+    .btn-quit:active {
+      background: var(--accent-red);
+      color: #ffffff;
+      border-color: var(--accent-red);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 10px 14px;
+      }
+      .brand img {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .brand-title {
+        font-size: 16px;
+      }
+      .brand-subtitle {
+        font-size: 8.5px;
+      }
+      .user-pill {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+      .btn-quit {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 8px;
+      }
+      .btn-quit .btn-label {
+        display: none;
+      }
+      .btn-quit svg {
+        width: 15px;
+        height: 15px;
+      }
     }
 
     /* Conteneur principal */
@@ -1123,15 +1174,17 @@
             <div class="brand-subtitle">Café • Plateforme Caisse</div>
           </div>
         </div>
-        <div class="user-pill">
-          <span class="user-name">Caisse</span>
-          <button class="btn-quit" onclick="handleLogout()" title="Se déconnecter">
+        <div class="header-actions">
+          <div class="user-pill">
+            <span class="user-name">Caisse</span>
+          </div>
+          <button type="button" class="btn-quit" onclick="handleLogout()" title="Se déconnecter" aria-label="Se déconnecter">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            Quitter
+            <span class="btn-label">Quitter</span>
           </button>
         </div>
       </div>
