@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Grey Corner — Créances Client</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #14120f;
+      --bg-card: #1f1b16;
+      --bg-card-hover: #26211c;
+      --bg-input: #181512;
+      --border: #3a3329;
+      --border-focus: #c3a15b;
+      --text-ivory: #f3ecdc;
+      --text-muted: #9e9484;
+      --accent-brass: #c3a15b;
+      --accent-brass-hover: #d8b66f;
+      --accent-green: #6fae7a;
+      --accent-green-bg: rgba(111, 174, 122, 0.12);
+      --accent-red: #c4655a;
+      --accent-red-bg: rgba(196, 101, 90, 0.12);
+      --accent-amber: #d4a359;
+      --accent-amber-bg: rgba(212, 163, 89, 0.15);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* En-tête */
+    header {
+      background: linear-gradient(180deg, rgba(31, 27, 22, 0.95) 0%, rgba(20, 18, 15, 0.8) 100%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 20px;
+    }
+
+    .header-inner {
+      max-width: 580px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent-brass);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(195, 161, 91, 0.08);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 13px;
+    }
+
+    .user-name {
+      color: var(--text-ivory);
+      font-weight: 500;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-quit {
+      background: transparent;
+      border: none;
+      color: var(--accent-red);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 6px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .btn-quit:hover {
+      background: var(--accent-red-bg);
+    }
+
+    /* Conteneur principal */
+    main {
+      flex: 1;
+      max-width: 580px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Cartes */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(195, 161, 91, 0.35), transparent);
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent-brass);
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Carte Solde */
+    .balance-card {
+      text-align: center;
+      padding: 30px 20px;
+      background: radial-gradient(circle at top, rgba(195, 161, 91, 0.08) 0%, var(--bg-card) 75%);
+    }
+
+    .balance-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-family: var(--font-serif);
+      font-size: 46px;
+      font-weight: 700;
+      color: var(--accent-brass);
+      line-height: 1.1;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 20px rgba(195, 161, 91, 0.25);
+    }
+
+    .balance-notice {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      max-width: 320px;
+      margin: 0 auto;
+      border-top: 1px dashed rgba(58, 51, 41, 0.7);
+      padding-top: 12px;
+    }
+
+    /* Formulaires */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      font-size: 15px;
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(195, 161, 91, 0.15);
+    }
+
+    input::placeholder {
+      color: rgba(158, 148, 132, 0.45);
+    }
+
+    /* Sélecteur photo mobile */
+    .photo-upload-zone {
+      position: relative;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(24, 21, 18, 0.6);
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .photo-upload-zone:hover,
+    .photo-upload-zone.dragover {
+      border-color: var(--accent-brass);
+      background: rgba(195, 161, 91, 0.04);
+    }
+
+    .photo-upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      width: 32px;
+      height: 32px;
+      color: var(--accent-brass);
+    }
+
+    .upload-hint {
+      font-size: 13px;
+      color: var(--text-ivory);
+      font-weight: 500;
+    }
+
+    .upload-subhint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .preview-container {
+      position: relative;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .preview-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      background: #000;
+      display: block;
+    }
+
+    .preview-remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(20, 18, 15, 0.85);
+      color: var(--accent-red);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Boutons */
+    .btn {
+      width: 100%;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--accent-brass) 0%, #aa8945 100%);
+      color: #14120f;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(195, 161, 91, 0.25);
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: rgba(195, 161, 91, 0.1);
+      color: var(--accent-brass);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(195, 161, 91, 0.18);
+    }
+
+    /* Auth screen */
+    .auth-wrapper {
+      max-width: 420px;
+      width: 100%;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .auth-brand-logo {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .auth-brand-title {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent-brass);
+      text-transform: uppercase;
+    }
+
+    .auth-brand-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--accent-brass);
+      color: #14120f;
+    }
+
+    /* Alertes & Notifications */
+    .alert {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert-error {
+      background: var(--accent-red-bg);
+      border: 1px solid rgba(196, 101, 90, 0.4);
+      color: #e59086;
+    }
+
+    .alert-success {
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(111, 174, 122, 0.4);
+      color: #9cd1a4;
+    }
+
+    /* Historique */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(24, 21, 18, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: rgba(195, 161, 91, 0.3);
+    }
+
+    .history-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .history-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .history-icon.depot {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid rgba(111, 174, 122, 0.3);
+    }
+
+    .history-icon.commande {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+      border: 1px solid rgba(196, 101, 90, 0.3);
+    }
+
+    .history-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-ivory);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .history-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+      width: fit-content;
+    }
+
+    .history-badge.en_attente {
+      background: var(--accent-amber-bg);
+      color: var(--accent-amber);
+      border: 1px solid rgba(212, 163, 89, 0.4);
+    }
+
+    .history-badge.valide {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid rgba(111, 174, 122, 0.3);
+    }
+
+    .history-badge.rejete {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+      border: 1px solid rgba(196, 101, 90, 0.3);
+    }
+
+    .history-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .history-amount {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .history-amount.depot {
+      color: var(--accent-green);
+    }
+
+    .history-amount.commande {
+      color: var(--accent-red);
+    }
+
+    .btn-ticket-sm {
+      background: rgba(195, 161, 91, 0.1);
+      border: 1px solid var(--border);
+      color: var(--accent-brass);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-ticket-sm:hover {
+      background: rgba(195, 161, 91, 0.2);
+      border-color: var(--accent-brass);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Modal Plein Écran pour Ticket */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 6, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      position: relative;
+      max-width: 95vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal-img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-ivory);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .modal-spinner {
+      color: var(--accent-brass);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(195, 161, 91, 0.2);
+      border-top-color: var(--accent-brass);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL VISUALISATION TICKET -->
+  <div id="ticket-modal" class="modal-overlay" onclick="closeTicketModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeTicketModal()" aria-label="Fermer">✕</button>
+      <div id="modal-loader" class="modal-spinner">
+        <div class="spinner"></div>
+        <span>Chargement du ticket...</span>
+      </div>
+      <img id="modal-img" class="modal-img hidden" alt="Photo du ticket" />
+    </div>
+  </div>
+
+  <!-- ÉCRAN AUTHENTIFICATION (Connexion / Inscription) -->
+  <div id="auth-screen" class="auth-wrapper">
+    <div class="auth-brand-logo">
+      <div class="auth-brand-title">Grey Corner</div>
+      <div class="auth-brand-sub">Créances & Dépôts Clients</div>
+    </div>
+
+    <div class="card">
+      <div class="auth-tabs">
+        <button id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
+        <button id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">Nouveau compte</button>
+      </div>
+
+      <div id="auth-alert" class="alert alert-error"></div>
+
+      <!-- Formulaire Connexion -->
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-username">Nom d'utilisateur</label>
+          <input type="text" id="login-username" placeholder="Votre nom" required autocomplete="username" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Mot de passe</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="btn-login-submit" class="btn">Se connecter</button>
+      </form>
+
+      <!-- Formulaire Inscription -->
+      <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="reg-username">Nom d'utilisateur (3 car. min)</label>
+          <input type="text" id="reg-username" placeholder="ex. hicham" minlength="3" required autocomplete="username" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Mot de passe (6 car. min)</label>
+          <input type="password" id="reg-password" placeholder="6 caractères minimum" minlength="6" required autocomplete="new-password">
+        </div>
+        <button type="submit" id="btn-reg-submit" class="btn">Créer mon compte</button>
+        <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.4;">
+          Inscription directe : votre nom et un mot de passe suffisent pour ouvrir votre compte prépayé.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION CLIENT (Visible après authentification) -->
+  <div id="app-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column;">
+    <header>
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-title">Grey Corner</div>
+          <div class="brand-subtitle">Espace Créance</div>
+        </div>
+        <div class="user-pill">
+          <span class="user-name" id="user-display-name">-</span>
+          <button class="btn-quit" onclick="handleLogout()" title="Se déconnecter">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Quitter
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Carte 1 : Solde -->
+      <section class="card balance-card">
+        <div class="balance-label">Votre Solde Actuel</div>
+        <div class="balance-amount" id="balance-value">0,00 DH</div>
+        <div class="balance-notice">
+          Pour alimenter votre solde, faites un dépôt à la caisse.
+        </div>
+      </section>
+
+      <!-- Carte 2 : Nouvelle commande -->
+      <section class="card">
+        <div class="card-title">
+          <span>Nouvelle commande</span>
+          <span style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">Débit sur solde</span>
+        </div>
+
+        <div id="cmd-alert" class="alert"></div>
+
+        <form id="order-form" onsubmit="handleSendOrder(event)">
+          <div class="form-group">
+            <label for="cmd-amount">Montant du ticket (DH)</label>
+            <input type="number" id="cmd-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 85.00" required>
+          </div>
+
+          <div class="form-group">
+            <label>Photo du ticket de caisse</label>
+            <div id="upload-zone" class="photo-upload-zone" onclick="document.getElementById('cmd-photo').click()">
+              <input type="file" id="cmd-photo" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <div class="upload-hint" id="upload-hint-text">Prendre en photo le ticket</div>
+              <div class="upload-subhint">Appareil photo mobile ou fichier</div>
+            </div>
+
+            <div id="preview-box" class="preview-container">
+              <img id="preview-img" class="preview-img" alt="Aperçu ticket" />
+              <button type="button" class="preview-remove-btn" onclick="clearSelectedPhoto(event)" title="Supprimer la photo">✕</button>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit-order" class="btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Envoyer le ticket
+          </button>
+        </form>
+      </section>
+
+      <!-- Carte 3 : Historique -->
+      <section class="card">
+        <div class="card-title">
+          <span>Historique</span>
+          <span id="history-count" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 mouvement</span>
+        </div>
+
+        <div id="history-container" class="history-list">
+          <div class="empty-state">
+            Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      collection,
+      query,
+      where,
+      onSnapshot,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Constante MODE requise
+    const MODE = 'client';
+
+    // Configuration Firebase Grey Corner
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoINLpUCCic9Xz9_PnM3al9Iu69q1FQpY",
+      authDomain: "grey-corner-restaurant.firebaseapp.com",
+      projectId: "grey-corner-restaurant",
+      storageBucket: "grey-corner-restaurant.firebasestorage.app",
+      messagingSenderId: "251703175568",
+      appId: "1:251703175568:web:8d693adc297eb869d12b15",
+      measurementId: "G-3HVHB0EELC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // État global
+    let currentUser = null;
+    let currentUserProfile = null;
+    let isRegistering = false;
+    let unsubscribeTransactions = null;
+    let selectedCompressedPhoto = null;
+
+    // Helpers
+    const usernameToEmail = (username) => {
+      const clean = (username || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      return `${clean}@greycorner.app`;
+    };
+
+    const escapeHtml = (str) => {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    const formatDH = (amount) => {
+      const n = Number(amount) || 0;
+      return n.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + ' DH';
+    };
+
+    const formatDate = (timestamp) => {
+      if (!timestamp) return '-';
+      const d = new Date(timestamp);
+      return d.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    // Compression d'image canvas (max 900px, jpeg 0.6)
+    function compressImage(file, maxDimension = 900, quality = 0.6) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Erreur de lecture du fichier image"));
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Erreur de chargement de l'image"));
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Gestion de l'affichage des alertes
+    function showAuthAlert(msg) {
+      const el = document.getElementById('auth-alert');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function clearAuthAlert() {
+      const el = document.getElementById('auth-alert');
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+
+    function showCmdAlert(msg, isSuccess = false) {
+      const el = document.getElementById('cmd-alert');
+      el.className = isSuccess ? 'alert alert-success' : 'alert alert-error';
+      el.textContent = msg;
+      el.style.display = 'block';
+      if (isSuccess) {
+        setTimeout(() => { el.style.display = 'none'; }, 6000);
+      }
+    }
+
+    function clearCmdAlert() {
+      const el = document.getElementById('cmd-alert');
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+
+    // Bascule entre onglets auth
+    window.switchAuthTab = (tab) => {
+      clearAuthAlert();
+      const tabLogin = document.getElementById('tab-login');
+      const tabReg = document.getElementById('tab-register');
+      const formLogin = document.getElementById('login-form');
+      const formReg = document.getElementById('register-form');
+
+      if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabReg.classList.remove('active');
+        formLogin.classList.remove('hidden');
+        formReg.classList.add('hidden');
+      } else {
+        tabReg.classList.add('active');
+        tabLogin.classList.remove('active');
+        formReg.classList.remove('hidden');
+        formLogin.classList.add('hidden');
+      }
+    };
+
+    // Connexion
+    window.handleLogin = async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+      const usernameInput = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const submitBtn = document.getElementById('btn-login-submit');
+
+      if (usernameInput.length < 3) {
+        showAuthAlert("Le nom d'utilisateur doit comporter au moins 3 caractères.");
+        return;
+      }
+      if (password.length < 6) {
+        showAuthAlert("Le mot de passe doit comporter au moins 6 caractères.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Connexion...";
+
+      try {
+        const email = usernameToEmail(usernameInput);
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        console.error("Login error:", err);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Se connecter";
+        if (
+          err.code === 'auth/invalid-credential' ||
+          err.code === 'auth/user-not-found' ||
+          err.code === 'auth/wrong-password' ||
+          err.code === 'auth/invalid-email'
+        ) {
+          showAuthAlert("Identifiants incorrects.");
+        } else {
+          showAuthAlert("Erreur de connexion : " + (err.message || "Veuillez réessayer."));
+        }
+      }
+    };
+
+    // Inscription
+    window.handleRegister = async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+      const usernameInput = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const submitBtn = document.getElementById('btn-reg-submit');
+
+      if (usernameInput.length < 3) {
+        showAuthAlert("Le nom d'utilisateur doit comporter au moins 3 caractères.");
+        return;
+      }
+      if (password.length < 6) {
+        showAuthAlert("Le mot de passe doit comporter au moins 6 caractères.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Création du compte...";
+      isRegistering = true; // Empêche onAuthStateChanged de lire le profil avant création
+
+      try {
+        const email = usernameToEmail(usernameInput);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        // Création du document users/{uid}
+        await setDoc(doc(db, 'users', uid), {
+          username: usernameInput,
+          nom: usernameInput,
+          role: 'client',
+          createdAt: Date.now()
+        });
+
+        isRegistering = false;
+        // Déclencher le chargement du profil
+        await loadUserProfile(userCredential.user);
+      } catch (err) {
+        isRegistering = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Créer mon compte";
+        console.error("Register error:", err);
+        if (err.code === 'auth/email-already-in-use') {
+          showAuthAlert("Ce nom d'utilisateur est déjà utilisé.");
+        } else if (err.code === 'auth/weak-password') {
+          showAuthAlert("Le mot de passe doit comporter au moins 6 caractères.");
+        } else {
+          showAuthAlert("Erreur lors de l'inscription : " + (err.message || "Réessayez."));
+        }
+      }
+    };
+
+    // Déconnexion
+    window.handleLogout = async () => {
+      if (unsubscribeTransactions) {
+        unsubscribeTransactions();
+        unsubscribeTransactions = null;
+      }
+      currentUser = null;
+      currentUserProfile = null;
+      await signOut(auth);
+    };
+
+    // Chargement du profil et validation rôle
+    async function loadUserProfile(user) {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) {
+          await signOut(auth);
+          showAuthAlert("Compte sans profil.");
+          return;
+        }
+
+        const profile = snap.data();
+        if (profile.role === 'caisse') {
+          await signOut(auth);
+          showAuthAlert("Compte caisse : utilisez la page caisse.");
+          return;
+        }
+
+        currentUser = user;
+        currentUserProfile = profile;
+
+        // Afficher l'application client
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('user-display-name').textContent = profile.nom || profile.username || 'Client';
+
+        // Écouteur temps réel sur les transactions
+        subscribeTransactions(user.uid);
+      } catch (err) {
+        console.error("Profile load error:", err);
+        await signOut(auth);
+        showAuthAlert("Erreur lors du chargement du profil.");
+      }
+    }
+
+    // Écouteur d'état Auth
+    onAuthStateChanged(auth, async (user) => {
+      if (isRegistering) {
+        return; // Création en cours, géré par handleRegister
+      }
+
+      if (user) {
+        await loadUserProfile(user);
+      } else {
+        if (unsubscribeTransactions) {
+          unsubscribeTransactions();
+          unsubscribeTransactions = null;
+        }
+        currentUser = null;
+        currentUserProfile = null;
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('btn-login-submit').disabled = false;
+        document.getElementById('btn-login-submit').textContent = "Se connecter";
+        document.getElementById('btn-reg-submit').disabled = false;
+        document.getElementById('btn-reg-submit').textContent = "Créer mon compte";
+      }
+    });
+
+    // Écouteur temps réel des transactions du client
+    function subscribeTransactions(uid) {
+      if (unsubscribeTransactions) {
+        unsubscribeTransactions();
+      }
+
+      const q = query(
+        collection(db, 'transactions'),
+        where('clientId', '==', uid)
+      );
+
+      unsubscribeTransactions = onSnapshot(q, (snapshot) => {
+        const list = [];
+        let totalDepots = 0;
+        let totalCommandes = 0;
+
+        snapshot.forEach((docSnap) => {
+          const t = { id: docSnap.id, ...docSnap.data() };
+          list.push(t);
+
+          // Seules les transactions valides comptent pour le solde
+          if (t.statut === 'valide') {
+            const m = Number(t.montant) || 0;
+            if (t.type === 'depot') {
+              totalDepots += m;
+            } else if (t.type === 'commande') {
+              totalCommandes += m;
+            }
+          }
+        });
+
+        // Solde = Dépôts validés − Commandes validées
+        const solde = totalDepots - totalCommandes;
+        document.getElementById('balance-value').textContent = formatDH(solde);
+
+        // Tri côté client par createdAt décroissant (pas d'index composite requis)
+        list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        renderHistory(list);
+      }, (error) => {
+        console.error("Snapshot error:", error);
+      });
+    }
+
+    // Rendu de l'historique
+    function renderHistory(items) {
+      const container = document.getElementById('history-container');
+      const countEl = document.getElementById('history-count');
+      countEl.textContent = `${items.length} mouvement${items.length > 1 ? 's' : ''}`;
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      items.forEach((item) => {
+        const isDepot = item.type === 'depot';
+        const typeLabel = isDepot ? 'Dépôt caisse' : 'Commande ticket';
+        const sign = isDepot ? '+' : '−';
+        const iconSymbol = isDepot ? '+' : '−';
+        const cls = isDepot ? 'depot' : 'commande';
+
+        let badgeLabel = 'Validé';
+        let badgeCls = 'valide';
+        if (item.statut === 'en_attente') {
+          badgeLabel = 'En attente';
+          badgeCls = 'en_attente';
+        } else if (item.statut === 'rejete') {
+          badgeLabel = 'Rejeté';
+          badgeCls = 'rejete';
+        }
+
+        const ticketBtnHtml = item.hasTicket ? `
+          <button type="button" class="btn-ticket-sm" onclick="openTicketModal('${escapeHtml(item.id)}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Ticket
+          </button>
+        ` : '';
+
+        html += `
+          <div class="history-item">
+            <div class="history-left">
+              <div class="history-icon ${cls}">${iconSymbol}</div>
+              <div class="history-details">
+                <div class="history-title">${escapeHtml(typeLabel)}</div>
+                <div class="history-date">${escapeHtml(formatDate(item.createdAt))}</div>
+                <span class="history-badge ${badgeCls}">${badgeLabel}</span>
+              </div>
+            </div>
+            <div class="history-right">
+              <div class="history-amount ${cls}">${sign}${escapeHtml(formatDH(item.montant))}</div>
+              ${ticketBtnHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Gestion sélection et compression photo
+    window.handlePhotoSelect = async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const hintText = document.getElementById('upload-hint-text');
+      hintText.textContent = "Compression de la photo...";
+
+      try {
+        selectedCompressedPhoto = await compressImage(file, 900, 0.6);
+        const previewImg = document.getElementById('preview-img');
+        previewImg.src = selectedCompressedPhoto;
+        document.getElementById('preview-box').style.display = 'block';
+        document.getElementById('upload-zone').style.display = 'none';
+      } catch (err) {
+        console.error("Compression error:", err);
+        showCmdAlert("Impossible de traiter cette photo. Veuillez réessayer.");
+        selectedCompressedPhoto = null;
+        hintText.textContent = "Prendre en photo le ticket";
+      }
+    };
+
+    window.clearSelectedPhoto = (e) => {
+      if (e) e.stopPropagation();
+      selectedCompressedPhoto = null;
+      document.getElementById('cmd-photo').value = '';
+      document.getElementById('preview-img').src = '';
+      document.getElementById('preview-box').style.display = 'none';
+      document.getElementById('upload-zone').style.display = 'flex';
+      document.getElementById('upload-hint-text').textContent = "Prendre en photo le ticket";
+    };
+
+    // Envoi de commande ticket (atomique avec writeBatch)
+    window.handleSendOrder = async (e) => {
+      e.preventDefault();
+      clearCmdAlert();
+
+      if (!currentUser) {
+        showCmdAlert("Vous devez être connecté.");
+        return;
+      }
+
+      const amountInput = document.getElementById('cmd-amount');
+      const amountVal = parseFloat(amountInput.value);
+
+      if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
+        showCmdAlert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+
+      if (!selectedCompressedPhoto) {
+        showCmdAlert("La photo du ticket est obligatoire pour enregistrer une commande.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-submit-order');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Envoi en cours...";
+
+      try {
+        // ID partagé entre transaction et ticket
+        const transRef = doc(collection(db, 'transactions'));
+        const transId = transRef.id;
+        const ticketRef = doc(db, 'tickets', transId);
+
+        const now = Date.now();
+        const batch = writeBatch(db);
+
+        // 1. Stockage de la photo compressée dans tickets/{id}
+        batch.set(ticketRef, {
+          clientId: currentUser.uid,
+          img: selectedCompressedPhoto,
+          createdAt: now
+        });
+
+        // 2. Création de la transaction dans transactions/{id}
+        batch.set(transRef, {
+          clientId: currentUser.uid,
+          type: 'commande',
+          montant: amountVal,
+          statut: 'en_attente',
+          hasTicket: true,
+          createdAt: now,
+          by: currentUser.uid
+        });
+
+        await batch.commit();
+
+        // Réinitialisation du formulaire
+        amountInput.value = '';
+        clearSelectedPhoto();
+        showCmdAlert("Votre ticket de " + formatDH(amountVal) + " a été envoyé à la caisse pour validation.", true);
+      } catch (err) {
+        console.error("Order submit error:", err);
+        showCmdAlert("Échec de l'envoi : " + (err.message || "Veuillez réessayer."));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          Envoyer le ticket
+        `;
+      }
+    };
+
+    // Visualisation du ticket en grand
+    window.openTicketModal = async (transId) => {
+      const modal = document.getElementById('ticket-modal');
+      const loader = document.getElementById('modal-loader');
+      const img = document.getElementById('modal-img');
+
+      modal.style.display = 'flex';
+      loader.style.display = 'flex';
+      img.classList.add('hidden');
+      img.src = '';
+
+      try {
+        const snap = await getDoc(doc(db, 'tickets', transId));
+        if (snap.exists() && snap.data().img) {
+          img.src = snap.data().img;
+          img.onload = () => {
+            loader.style.display = 'none';
+            img.classList.remove('hidden');
+          };
+        } else {
+          loader.innerHTML = `<span>Photo introuvable pour ce ticket.</span>`;
+        }
+      } catch (err) {
+        console.error("Ticket fetch error:", err);
+        loader.innerHTML = `<span>Erreur de chargement du ticket.</span>`;
+      }
+    };
+
+    window.closeTicketModal = () => {
+      const modal = document.getElementById('ticket-modal');
+      modal.style.display = 'none';
+      document.getElementById('modal-img').src = '';
+    };
+
+    // Fermeture avec touche Échap
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeTicketModal();
+      }
+    });
+  </script>
+</body>
+</html>

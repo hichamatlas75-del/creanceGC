@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Grey Corner — Espace Caisse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #14120f;
+      --bg-card: #1f1b16;
+      --bg-card-hover: #26211c;
+      --bg-input: #181512;
+      --border: #3a3329;
+      --border-focus: #c3a15b;
+      --text-ivory: #f3ecdc;
+      --text-muted: #9e9484;
+      --accent-brass: #c3a15b;
+      --accent-brass-hover: #d8b66f;
+      --accent-green: #6fae7a;
+      --accent-green-bg: rgba(111, 174, 122, 0.12);
+      --accent-green-border: rgba(111, 174, 122, 0.35);
+      --accent-red: #c4655a;
+      --accent-red-bg: rgba(196, 101, 90, 0.12);
+      --accent-red-border: rgba(196, 101, 90, 0.35);
+      --accent-amber: #d4a359;
+      --accent-amber-bg: rgba(212, 163, 89, 0.15);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* En-tête */
+    header {
+      background: linear-gradient(180deg, rgba(31, 27, 22, 0.98) 0%, rgba(20, 18, 15, 0.9) 100%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 20px;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent-brass);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(195, 161, 91, 0.08);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 13px;
+    }
+
+    .user-name {
+      color: var(--accent-brass);
+      font-weight: 600;
+    }
+
+    .btn-quit {
+      background: transparent;
+      border: none;
+      color: var(--accent-red);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 6px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+
+    .btn-quit:hover {
+      background: var(--accent-red-bg);
+    }
+
+    /* Conteneur principal */
+    main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Cartes */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    /* Bandeau de statistiques */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card.stat-green {
+      border-top: 3px solid var(--accent-green);
+    }
+
+    .stat-card.stat-red {
+      border-top: 3px solid var(--accent-red);
+    }
+
+    .stat-card.stat-brass {
+      border-top: 3px solid var(--accent-brass);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-amount {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .stat-amount.stat-green {
+      color: var(--accent-green);
+    }
+
+    .stat-amount.stat-red {
+      color: var(--accent-red);
+    }
+
+    .stat-amount.stat-brass {
+      color: var(--accent-brass);
+    }
+
+    /* Onglets */
+    .tabs-nav {
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 5px;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-height: 44px;
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-brass);
+      color: #14120f;
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.25);
+      color: inherit;
+    }
+
+    .tab-btn.active .tab-badge {
+      background: rgba(20, 18, 15, 0.25);
+      color: #14120f;
+    }
+
+    .tab-btn:not(.active) .tab-badge.highlight {
+      background: var(--accent-red);
+      color: #fff;
+    }
+
+    /* Contenus des onglets */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Barre de recherche clients */
+    .search-box {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px 13px 40px;
+      font-size: 15px;
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(195, 161, 91, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Listes d'éléments */
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: rgba(24, 21, 18, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+
+    .item-card:hover {
+      border-color: rgba(195, 161, 91, 0.35);
+      background: rgba(24, 21, 18, 0.95);
+    }
+
+    @media (max-width: 600px) {
+      .item-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .item-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    .item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .item-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-ivory);
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+
+    .item-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    /* Boutons d'action */
+    .btn-action {
+      min-height: 40px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-valider {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border-color: var(--accent-green-border);
+    }
+
+    .btn-valider:hover:not(:disabled) {
+      background: rgba(111, 174, 122, 0.25);
+    }
+
+    .btn-rejeter {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+      border-color: var(--accent-red-border);
+    }
+
+    .btn-rejeter:hover:not(:disabled) {
+      background: rgba(196, 101, 90, 0.25);
+    }
+
+    .btn-ticket {
+      background: rgba(195, 161, 91, 0.1);
+      color: var(--accent-brass);
+      border-color: var(--border);
+    }
+
+    .btn-ticket:hover:not(:disabled) {
+      background: rgba(195, 161, 91, 0.2);
+      border-color: var(--accent-brass);
+    }
+
+    .btn-depot {
+      background: linear-gradient(135deg, #4d8355 0%, #3d6944 100%);
+      color: #f3ecdc;
+      box-shadow: 0 2px 8px rgba(111, 174, 122, 0.2);
+    }
+
+    .btn-depot:hover:not(:disabled) {
+      filter: brightness(1.15);
+    }
+
+    .btn-commande {
+      background: linear-gradient(135deg, #8a4138 0%, #6d332c 100%);
+      color: #f3ecdc;
+      box-shadow: 0 2px 8px rgba(196, 101, 90, 0.2);
+    }
+
+    .btn-commande:hover:not(:disabled) {
+      filter: brightness(1.15);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-valide {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green-border);
+    }
+
+    .badge-attente {
+      background: var(--accent-amber-bg);
+      color: var(--accent-amber);
+      border: 1px solid rgba(212, 163, 89, 0.4);
+    }
+
+    .badge-depot {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+    }
+
+    .badge-commande {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+    }
+
+    /* État vide */
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Auth screen caisse */
+    .auth-wrapper {
+      max-width: 420px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .auth-brand-logo {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .auth-brand-title {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent-brass);
+      text-transform: uppercase;
+    }
+
+    .auth-brand-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      font-size: 15px;
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(195, 161, 91, 0.15);
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--accent-brass) 0%, #aa8945 100%);
+      color: #14120f;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(195, 161, 91, 0.25);
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert-error {
+      background: var(--accent-red-bg);
+      border: 1px solid rgba(196, 101, 90, 0.4);
+      color: #e59086;
+    }
+
+    /* Écran Accès Caisse Refusé */
+    .denied-box {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .denied-icon {
+      font-size: 40px;
+      color: var(--accent-red);
+      margin-bottom: 12px;
+    }
+
+    .denied-title {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      color: var(--accent-red);
+      margin-bottom: 12px;
+    }
+
+    .denied-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .denied-code {
+      background: #000;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--accent-brass);
+      word-break: break-all;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    /* Modales */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 6, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--accent-brass);
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .modal-close:hover {
+      color: var(--text-ivory);
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .chip-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-ivory);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--accent-brass);
+      color: var(--accent-brass);
+    }
+
+    .warning-box {
+      background: var(--accent-amber-bg);
+      border: 1px solid rgba(212, 163, 89, 0.4);
+      color: #f7d294;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      box-shadow: none;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-ivory);
+    }
+
+    /* Modal Ticket Plein Écran */
+    .ticket-fullscreen-content {
+      position: relative;
+      max-width: 95vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal-ticket-img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-ticket-close {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-ivory);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(195, 161, 91, 0.2);
+      border-top-color: var(--accent-brass);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL TICKET PLEIN ÉCRAN -->
+  <div id="ticket-modal" class="modal-overlay" onclick="closeTicketModal(event)">
+    <div class="ticket-fullscreen-content" onclick="event.stopPropagation()">
+      <button class="modal-ticket-close" onclick="closeTicketModal()" aria-label="Fermer">✕</button>
+      <div id="ticket-loader" style="color: var(--accent-brass); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div class="spinner"></div>
+        <span>Chargement du ticket...</span>
+      </div>
+      <img id="modal-ticket-img" class="modal-ticket-img hidden" alt="Ticket" />
+    </div>
+  </div>
+
+  <!-- MODAL AJOUT DÉPÔT CLIENT -->
+  <div id="depot-modal" class="modal-overlay" onclick="closeDepotModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">+ Dépôt d'espèces</div>
+        <button class="modal-close" onclick="closeDepotModal()">✕</button>
+      </div>
+
+      <p id="depot-modal-client-name" style="font-size: 14px; color: var(--text-ivory); margin-bottom: 14px; font-weight: 500;">
+        Client : -
+      </p>
+
+      <form id="depot-form" onsubmit="submitClientDepot(event)">
+        <div class="form-group">
+          <label for="depot-amount">Montant du dépôt (DH)</label>
+          <input type="number" id="depot-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 500.00" required autofocus>
+        </div>
+
+        <div class="quick-chips">
+          <button type="button" class="chip-btn" onclick="setDepotAmount(50)">+50 DH</button>
+          <button type="button" class="chip-btn" onclick="setDepotAmount(100)">+100 DH</button>
+          <button type="button" class="chip-btn" onclick="setDepotAmount(200)">+200 DH</button>
+          <button type="button" class="chip-btn" onclick="setDepotAmount(500)">+500 DH</button>
+          <button type="button" class="chip-btn" onclick="setDepotAmount(1000)">+1 000 DH</button>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeDepotModal()">Annuler</button>
+          <button type="submit" id="btn-depot-submit" class="btn btn-depot">Encaisser le dépôt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL SAISIE COMMANDE CLIENT -->
+  <div id="commande-modal" class="modal-overlay" onclick="closeCommandeModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">− Commande directe</div>
+        <button class="modal-close" onclick="closeCommandeModal()">✕</button>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+        <span id="commande-modal-client-name" style="color: var(--text-ivory); font-weight: 600;">Client</span>
+        <br>Solde disponible : <strong id="commande-modal-client-balance" style="color: var(--accent-brass);">0,00 DH</strong>
+      </div>
+
+      <div id="commande-overrun-warning" class="warning-box">
+        <strong>Attention :</strong> Ce montant dépasse le solde du client. Un débit entraînera un solde négatif.
+      </div>
+
+      <form id="commande-form" onsubmit="submitClientCommande(event)">
+        <div class="form-group">
+          <label for="commande-amount">Montant à débiter (DH)</label>
+          <input type="number" id="commande-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 85.00" required autofocus oninput="checkCommandeOverrun()">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeCommandeModal()">Annuler</button>
+          <button type="submit" id="btn-commande-submit" class="btn btn-commande">Valider le débit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ÉCRAN CONNEXION CAISSE -->
+  <div id="auth-screen" class="auth-wrapper">
+    <div class="auth-brand-logo">
+      <div class="auth-brand-title">Grey Corner</div>
+      <div class="auth-brand-sub">Espace Caisse Sécurisé</div>
+    </div>
+
+    <!-- Formulaire connexion caisse -->
+    <div id="login-box" class="card">
+      <div id="auth-alert" class="alert alert-error"></div>
+
+      <form id="login-form" onsubmit="handleCaisseLogin(event)">
+        <div class="form-group">
+          <label for="caisse-username">Identifiant Caisse</label>
+          <input type="text" id="caisse-username" placeholder="caisse" value="caisse" required autocomplete="username" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label for="caisse-password">Mot de passe</label>
+          <input type="password" id="caisse-password" placeholder="••••••••" required autocomplete="current-password" autofocus>
+        </div>
+        <button type="submit" id="btn-caisse-login" class="btn">Accéder à la caisse</button>
+      </form>
+    </div>
+
+    <!-- Écran Accès Caisse Refusé -->
+    <div id="denied-box" class="card denied-box hidden">
+      <div class="denied-icon">⛔</div>
+      <div class="denied-title">Accès caisse refusé</div>
+      <p class="denied-desc">
+        Ce compte ne possède pas le rôle <strong>caisse</strong>. L'accès à cette plateforme est strictement réservé au personnel de caisse habilité.
+      </p>
+      <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; text-align: left;">
+        Identifiant utilisateur (UID) à autoriser dans Firestore :
+      </div>
+      <div class="denied-code" id="denied-uid-text">-</div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 18px;">
+        Pour accorder l'accès caisse à cet utilisateur, modifiez le champ <code>role</code> à <code>'caisse'</code> dans le document <code>users/{uid}</code> sur Cloud Firestore.
+      </p>
+      <button type="button" class="btn btn-secondary" onclick="resetToLogin()">Retour à la connexion</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD CAISSE (Visible après authentification rôle 'caisse') -->
+  <div id="app-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column;">
+    <header>
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-title">Grey Corner</div>
+          <div class="brand-subtitle">Plateforme Caisse</div>
+        </div>
+        <div class="user-pill">
+          <span class="user-name">Caisse</span>
+          <button class="btn-quit" onclick="handleLogout()" title="Se déconnecter">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Quitter
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- 1. Bandeau Statistiques -->
+      <section class="stats-grid">
+        <div class="stat-card stat-green">
+          <div class="stat-label">Dépôts Encaissés</div>
+          <div class="stat-amount stat-green" id="stat-depots">0,00 DH</div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-label">Consommé / Créances</div>
+          <div class="stat-amount stat-red" id="stat-consomme">0,00 DH</div>
+        </div>
+        <div class="stat-card stat-brass">
+          <div class="stat-label">Solde Dû aux Clients</div>
+          <div class="stat-amount stat-brass" id="stat-solde-du">0,00 DH</div>
+        </div>
+      </section>
+
+      <!-- 2. Navigation Onglets -->
+      <nav class="tabs-nav">
+        <button id="tab-btn-pending" class="tab-btn active" onclick="switchTab('pending')">
+          <span>À valider</span>
+          <span id="badge-pending-count" class="tab-badge">0</span>
+        </button>
+        <button id="tab-btn-clients" class="tab-btn" onclick="switchTab('clients')">
+          <span>Clients</span>
+          <span id="badge-clients-count" class="tab-badge">0</span>
+        </button>
+        <button id="tab-btn-journal" class="tab-btn" onclick="switchTab('journal')">
+          <span>Journal</span>
+          <span id="badge-journal-count" class="tab-badge">0</span>
+        </button>
+      </nav>
+
+      <!-- ONGLET 1 : À VALIDER -->
+      <section id="pane-pending" class="tab-pane active">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 14px; font-size: 18px; color: var(--accent-brass); display: flex; justify-content: space-between;">
+            <span>Commandes en attente</span>
+            <span id="pending-subtitle" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 ticket</span>
+          </div>
+
+          <div id="pending-list" class="items-list">
+            <div class="empty-state">
+              Aucune commande en attente de validation.<br>Les tickets envoyés par les clients apparaîtront ici en direct.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ONGLET 2 : CLIENTS -->
+      <section id="pane-clients" class="tab-pane">
+        <div class="card">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="client-search" class="search-input" placeholder="Rechercher un client par son nom..." autocomplete="off" oninput="handleClientSearch(event)">
+          </div>
+
+          <div id="clients-list" class="items-list">
+            <div class="empty-state">
+              Chargement des clients...
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ONGLET 3 : JOURNAL -->
+      <section id="pane-journal" class="tab-pane">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 14px; font-size: 18px; color: var(--accent-brass); display: flex; justify-content: space-between;">
+            <span>Journal des 200 derniers mouvements</span>
+            <span id="journal-count-label" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 mouvement</span>
+          </div>
+
+          <div id="journal-list" class="items-list">
+            <div class="empty-state">
+              Aucun mouvement dans le journal.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      updateDoc,
+      collection,
+      query,
+      where,
+      onSnapshot,
+      addDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Constante MODE requise
+    const MODE = 'caisse';
+
+    // Configuration Firebase Grey Corner
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoINLpUCCic9Xz9_PnM3al9Iu69q1FQpY",
+      authDomain: "grey-corner-restaurant.firebaseapp.com",
+      projectId: "grey-corner-restaurant",
+      storageBucket: "grey-corner-restaurant.firebasestorage.app",
+      messagingSenderId: "251703175568",
+      appId: "1:251703175568:web:8d693adc297eb869d12b15",
+      measurementId: "G-3HVHB0EELC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // État global
+    let currentCaisseUser = null;
+    let unsubTransactions = null;
+    let unsubUsers = null;
+
+    let usersMap = new Map(); // uid -> { nom, username, ... }
+    let usersList = [];
+    let transactionsList = [];
+    let currentSearchTerm = '';
+
+    let activeModalClientId = null;
+    let activeModalClientBalance = 0;
+
+    // Helpers
+    const usernameToEmail = (username) => {
+      const clean = (username || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      return `${clean}@greycorner.app`;
+    };
+
+    const escapeHtml = (str) => {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    const formatDH = (amount) => {
+      const n = Number(amount) || 0;
+      return n.toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + ' DH';
+    };
+
+    const formatDate = (timestamp) => {
+      if (!timestamp) return '-';
+      const d = new Date(timestamp);
+      return d.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    function showAuthAlert(msg) {
+      const el = document.getElementById('auth-alert');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function clearAuthAlert() {
+      const el = document.getElementById('auth-alert');
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+
+    // Bascule des onglets
+    window.switchTab = (tabName) => {
+      ['pending', 'clients', 'journal'].forEach((t) => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const pane = document.getElementById(`pane-${t}`);
+        if (t === tabName) {
+          btn.classList.add('active');
+          pane.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          pane.classList.remove('active');
+        }
+      });
+    };
+
+    // Connexion Caisse
+    window.handleCaisseLogin = async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+      const usernameInput = document.getElementById('caisse-username').value.trim();
+      const password = document.getElementById('caisse-password').value;
+      const submitBtn = document.getElementById('btn-caisse-login');
+
+      if (!usernameInput) {
+        showAuthAlert("Veuillez saisir votre identifiant.");
+        return;
+      }
+      if (!password) {
+        showAuthAlert("Veuillez saisir votre mot de passe.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Connexion...";
+
+      try {
+        const email = usernameToEmail(usernameInput);
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        console.error("Caisse login error:", err);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Accéder à la caisse";
+        if (
+          err.code === 'auth/invalid-credential' ||
+          err.code === 'auth/user-not-found' ||
+          err.code === 'auth/wrong-password' ||
+          err.code === 'auth/invalid-email'
+        ) {
+          showAuthAlert("Identifiants incorrects.");
+        } else {
+          showAuthAlert("Erreur de connexion : " + (err.message || "Veuillez réessayer."));
+        }
+      }
+    };
+
+    // Retour au formulaire après écran refusé
+    window.resetToLogin = () => {
+      document.getElementById('denied-box').classList.add('hidden');
+      document.getElementById('login-box').classList.remove('hidden');
+      document.getElementById('btn-caisse-login').disabled = false;
+      document.getElementById('btn-caisse-login').textContent = "Accéder à la caisse";
+    };
+
+    // Déconnexion Caisse
+    window.handleLogout = async () => {
+      if (unsubTransactions) {
+        unsubTransactions();
+        unsubTransactions = null;
+      }
+      if (unsubUsers) {
+        unsubUsers();
+        unsubUsers = null;
+      }
+      currentCaisseUser = null;
+      usersMap.clear();
+      usersList = [];
+      transactionsList = [];
+      await signOut(auth);
+    };
+
+    // Vérification du rôle caisse
+    async function checkCaisseAccess(user) {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) {
+          await signOut(auth);
+          showAuthAlert("Compte sans profil.");
+          return;
+        }
+
+        const profile = snap.data();
+        if (profile.role !== 'caisse') {
+          const deniedUid = user.uid;
+          await signOut(auth);
+          // Affichage de l'écran "Accès caisse refusé" avec l'UID
+          document.getElementById('login-box').classList.add('hidden');
+          document.getElementById('denied-uid-text').textContent = deniedUid;
+          document.getElementById('denied-box').classList.remove('hidden');
+          return;
+        }
+
+        currentCaisseUser = user;
+
+        // Afficher dashboard caisse
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+
+        // Démarrer les écoutes temps réel
+        initRealtimeListeners();
+      } catch (err) {
+        console.error("Caisse check error:", err);
+        await signOut(auth);
+        showAuthAlert("Erreur de vérification des droits : " + err.message);
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await checkCaisseAccess(user);
+      } else {
+        if (unsubTransactions) { unsubTransactions(); unsubTransactions = null; }
+        if (unsubUsers) { unsubUsers(); unsubUsers = null; }
+        currentCaisseUser = null;
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+      }
+    });
+
+    // Écoutes temps réel sur transactions et users
+    function initRealtimeListeners() {
+      if (unsubUsers) unsubUsers();
+      if (unsubTransactions) unsubTransactions();
+
+      // 1. Écoute de la collection users
+      const usersQuery = collection(db, 'users');
+      unsubUsers = onSnapshot(usersQuery, (snapshot) => {
+        usersMap.clear();
+        usersList = [];
+        snapshot.forEach((docSnap) => {
+          const data = { id: docSnap.id, ...docSnap.data() };
+          usersMap.set(docSnap.id, data);
+          if (data.role === 'client') {
+            usersList.push(data);
+          }
+        });
+
+        // Tri des clients par nom
+        usersList.sort((a, b) => (a.nom || a.username || '').localeCompare(b.nom || b.username || ''));
+
+        recomputeAndRender();
+      }, (err) => {
+        console.error("Users snapshot error:", err);
+      });
+
+      // 2. Écoute de la collection transactions
+      const transQuery = collection(db, 'transactions');
+      unsubTransactions = onSnapshot(transQuery, (snapshot) => {
+        transactionsList = [];
+        snapshot.forEach((docSnap) => {
+          transactionsList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        recomputeAndRender();
+      }, (err) => {
+        console.error("Transactions snapshot error:", err);
+      });
+    }
+
+    // Recalcul des soldes et rendu global
+    function recomputeAndRender() {
+      // Calcul des soldes clients et totaux généraux
+      const clientBalances = new Map();
+      let totalDepots = 0;
+      let totalConsomme = 0;
+
+      transactionsList.forEach((t) => {
+        if (t.statut === 'valide') {
+          const m = Number(t.montant) || 0;
+          const currentBal = clientBalances.get(t.clientId) || 0;
+          if (t.type === 'depot') {
+            totalDepots += m;
+            clientBalances.set(t.clientId, currentBal + m);
+          } else if (t.type === 'commande') {
+            totalConsomme += m;
+            clientBalances.set(t.clientId, currentBal - m);
+          }
+        }
+      });
+
+      // 1. Bandeau de statistiques
+      const soldeDu = totalDepots - totalConsomme;
+      document.getElementById('stat-depots').textContent = formatDH(totalDepots);
+      document.getElementById('stat-consomme').textContent = formatDH(totalConsomme);
+      document.getElementById('stat-solde-du').textContent = formatDH(soldeDu);
+
+      // 2. Rendu Onglet 1 : À valider
+      const pendingOrders = transactionsList.filter((t) => t.statut === 'en_attente' && t.type === 'commande');
+      pendingOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      renderPendingTab(pendingOrders);
+
+      // 3. Rendu Onglet 2 : Clients
+      renderClientsTab(clientBalances);
+
+      // 4. Rendu Onglet 3 : Journal
+      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete');
+      validHistory.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const journal200 = validHistory.slice(0, 200);
+      renderJournalTab(journal200);
+    }
+
+    // Rendu onglet À valider
+    function renderPendingTab(pendingList) {
+      const container = document.getElementById('pending-list');
+      const badgeCount = document.getElementById('badge-pending-count');
+      const subTitle = document.getElementById('pending-subtitle');
+
+      badgeCount.textContent = pendingList.length;
+      if (pendingList.length > 0) {
+        badgeCount.classList.add('highlight');
+      } else {
+        badgeCount.classList.remove('highlight');
+      }
+      subTitle.textContent = `${pendingList.length} ticket${pendingList.length > 1 ? 's' : ''}`;
+
+      if (pendingList.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Aucune commande en attente de validation.<br>Les tickets envoyés par les clients apparaîtront ici en direct.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      pendingList.forEach((t) => {
+        const clientObj = usersMap.get(t.clientId);
+        const clientName = clientObj ? (clientObj.nom || clientObj.username) : `Client (${t.clientId.slice(0, 6)}...)`;
+
+        const ticketBtnHtml = t.hasTicket ? `
+          <button type="button" class="btn-action btn-ticket" onclick="openTicketModal('${escapeHtml(t.id)}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Ticket
+          </button>
+        ` : '';
+
+        html += `
+          <div class="item-card" id="pending-row-${escapeHtml(t.id)}">
+            <div class="item-info">
+              <div class="item-name">${escapeHtml(clientName)}</div>
+              <div class="item-sub">
+                <span>${escapeHtml(formatDate(t.createdAt))}</span>
+                <span>•</span>
+                <strong style="color: var(--accent-brass); font-size: 15px; font-family: var(--font-serif);">${escapeHtml(formatDH(t.montant))}</strong>
+              </div>
+            </div>
+            <div class="item-actions">
+              ${ticketBtnHtml}
+              <button type="button" class="btn-action btn-valider" onclick="validerCommande('${escapeHtml(t.id)}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Valider
+              </button>
+              <button type="button" class="btn-action btn-rejeter" onclick="rejeterCommande('${escapeHtml(t.id)}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                Rejeter
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Validation d'une commande
+    window.validerCommande = async (id) => {
+      try {
+        await updateDoc(doc(db, 'transactions', id), {
+          statut: 'valide'
+        });
+      } catch (err) {
+        console.error("Valider commande error:", err);
+        alert("Erreur lors de la validation : " + err.message);
+      }
+    };
+
+    // Rejet d'une commande
+    window.rejeterCommande = async (id) => {
+      if (!confirm("Voulez-vous rejeter ce ticket ? Le montant ne sera pas débité.")) {
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'transactions', id), {
+          statut: 'rejete'
+        });
+      } catch (err) {
+        console.error("Rejeter commande error:", err);
+        alert("Erreur lors du rejet : " + err.message);
+      }
+    };
+
+    // Recherche de clients sans perte de focus
+    window.handleClientSearch = (e) => {
+      currentSearchTerm = (e.target.value || '').trim().toLowerCase();
+      // On met à jour uniquement la liste des clients sans toucher à l'input
+      recomputeAndRender();
+    };
+
+    // Rendu onglet Clients
+    function renderClientsTab(clientBalances) {
+      const container = document.getElementById('clients-list');
+      const badgeCount = document.getElementById('badge-clients-count');
+      badgeCount.textContent = usersList.length;
+
+      let filtered = usersList;
+      if (currentSearchTerm) {
+        filtered = usersList.filter((u) => {
+          const name = (u.nom || '').toLowerCase();
+          const username = (u.username || '').toLowerCase();
+          return name.includes(currentSearchTerm) || username.includes(currentSearchTerm);
+        });
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            ${currentSearchTerm ? 'Aucun client trouvé pour cette recherche.' : 'Aucun client inscrit pour le moment.'}
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((client) => {
+        const bal = clientBalances.get(client.id) || 0;
+        let balColor = 'var(--text-ivory)';
+        if (bal > 0) balColor = 'var(--accent-green)';
+        else if (bal < 0) balColor = 'var(--accent-red)';
+
+        const displayName = client.nom || client.username || 'Sans nom';
+
+        html += `
+          <div class="item-card">
+            <div class="item-info">
+              <div class="item-name">${escapeHtml(displayName)}</div>
+              <div class="item-sub">
+                <span>Solde actuel :</span>
+                <strong style="color: ${balColor}; font-size: 16px; font-family: var(--font-serif);">${escapeHtml(formatDH(bal))}</strong>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn-action btn-depot" onclick="openDepotModal('${escapeHtml(client.id)}', '${escapeHtml(displayName)}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                + Dépôt
+              </button>
+              <button type="button" class="btn-action btn-commande" onclick="openCommandeModal('${escapeHtml(client.id)}', '${escapeHtml(displayName)}', ${bal})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                − Commande
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Rendu onglet Journal
+    function renderJournalTab(journalItems) {
+      const container = document.getElementById('journal-list');
+      const countLabel = document.getElementById('journal-count-label');
+      const badgeCount = document.getElementById('badge-journal-count');
+
+      badgeCount.textContent = journalItems.length;
+      countLabel.textContent = `${journalItems.length} mouvement${journalItems.length > 1 ? 's' : ''}`;
+
+      if (journalItems.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Aucun mouvement enregistré.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      journalItems.forEach((t) => {
+        const clientObj = usersMap.get(t.clientId);
+        const clientName = clientObj ? (clientObj.nom || clientObj.username) : `Client (${t.clientId.slice(0, 6)}...)`;
+        const isDepot = t.type === 'depot';
+        const sign = isDepot ? '+' : '−';
+        const amountColor = isDepot ? 'var(--accent-green)' : 'var(--accent-red)';
+        const typeBadge = isDepot
+          ? '<span class="badge badge-depot">Dépôt</span>'
+          : '<span class="badge badge-commande">Commande</span>';
+
+        const statusBadge = t.statut === 'valide'
+          ? '<span class="badge badge-valide">Validé</span>'
+          : '<span class="badge badge-attente">En attente</span>';
+
+        const ticketBtn = t.hasTicket ? `
+          <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Ticket
+          </button>
+        ` : '';
+
+        html += `
+          <div class="item-card" style="padding: 12px 14px;">
+            <div class="item-info">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
+                <span class="item-name" style="font-size: 14px;">${escapeHtml(clientName)}</span>
+                ${typeBadge}
+                ${statusBadge}
+              </div>
+              <div class="item-sub">
+                <span>${escapeHtml(formatDate(t.createdAt))}</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <span style="color: ${amountColor}; font-family: var(--font-serif); font-size: 17px; font-weight: 700;">
+                ${sign}${escapeHtml(formatDH(t.montant))}
+              </span>
+              ${ticketBtn}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Modal Dépôt
+    window.openDepotModal = (clientId, clientName) => {
+      activeModalClientId = clientId;
+      document.getElementById('depot-modal-client-name').textContent = `Client : ${clientName}`;
+      document.getElementById('depot-amount').value = '';
+      document.getElementById('depot-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('depot-amount').focus(), 100);
+    };
+
+    window.closeDepotModal = () => {
+      document.getElementById('depot-modal').style.display = 'none';
+      activeModalClientId = null;
+    };
+
+    window.setDepotAmount = (val) => {
+      document.getElementById('depot-amount').value = val;
+    };
+
+    window.submitClientDepot = async (e) => {
+      e.preventDefault();
+      if (!activeModalClientId) return;
+
+      const amountVal = parseFloat(document.getElementById('depot-amount').value);
+      if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
+        alert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-depot-submit');
+      btn.disabled = true;
+      btn.textContent = "Encaissement...";
+
+      try {
+        await addDoc(collection(db, 'transactions'), {
+          clientId: activeModalClientId,
+          type: 'depot',
+          montant: amountVal,
+          statut: 'valide',
+          hasTicket: false,
+          createdAt: Date.now(),
+          by: auth.currentUser.uid
+        });
+
+        closeDepotModal();
+      } catch (err) {
+        console.error("Depot submit error:", err);
+        alert("Erreur lors de l'enregistrement du dépôt : " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Encaisser le dépôt";
+      }
+    };
+
+    // Modal Commande
+    window.openCommandeModal = (clientId, clientName, currentBalance) => {
+      activeModalClientId = clientId;
+      activeModalClientBalance = currentBalance;
+      document.getElementById('commande-modal-client-name').textContent = clientName;
+      document.getElementById('commande-modal-client-balance').textContent = formatDH(currentBalance);
+      document.getElementById('commande-amount').value = '';
+      document.getElementById('commande-overrun-warning').style.display = 'none';
+      document.getElementById('commande-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('commande-amount').focus(), 100);
+    };
+
+    window.closeCommandeModal = () => {
+      document.getElementById('commande-modal').style.display = 'none';
+      activeModalClientId = null;
+    };
+
+    window.checkCommandeOverrun = () => {
+      const val = parseFloat(document.getElementById('commande-amount').value) || 0;
+      const warningBox = document.getElementById('commande-overrun-warning');
+      if (val > activeModalClientBalance) {
+        warningBox.style.display = 'block';
+      } else {
+        warningBox.style.display = 'none';
+      }
+    };
+
+    window.submitClientCommande = async (e) => {
+      e.preventDefault();
+      if (!activeModalClientId) return;
+
+      const amountVal = parseFloat(document.getElementById('commande-amount').value);
+      if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
+        alert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+
+      // Si le montant dépasse le solde du client, confirmation obligatoire
+      if (amountVal > activeModalClientBalance) {
+        const confirmMsg = `Attention : ce montant (${formatDH(amountVal)}) dépasse le solde du client (${formatDH(activeModalClientBalance)}).\n\nConfirmer quand même ?`;
+        if (!confirm(confirmMsg)) {
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-commande-submit');
+      btn.disabled = true;
+      btn.textContent = "Validation...";
+
+      try {
+        await addDoc(collection(db, 'transactions'), {
+          clientId: activeModalClientId,
+          type: 'commande',
+          montant: amountVal,
+          statut: 'valide',
+          hasTicket: false,
+          createdAt: Date.now(),
+          by: auth.currentUser.uid
+        });
+
+        closeCommandeModal();
+      } catch (err) {
+        console.error("Commande submit error:", err);
+        alert("Erreur lors de l'enregistrement de la commande : " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Valider le débit";
+      }
+    };
+
+    // Modal Visualisation Ticket
+    window.openTicketModal = async (transId) => {
+      const modal = document.getElementById('ticket-modal');
+      const loader = document.getElementById('ticket-loader');
+      const img = document.getElementById('modal-ticket-img');
+
+      modal.style.display = 'flex';
+      loader.style.display = 'flex';
+      img.classList.add('hidden');
+      img.src = '';
+
+      try {
+        const snap = await getDoc(doc(db, 'tickets', transId));
+        if (snap.exists() && snap.data().img) {
+          img.src = snap.data().img;
+          img.onload = () => {
+            loader.style.display = 'none';
+            img.classList.remove('hidden');
+          };
+        } else {
+          loader.innerHTML = `<span>Photo introuvable pour ce ticket.</span>`;
+        }
+      } catch (err) {
+        console.error("Ticket fetch error:", err);
+        loader.innerHTML = `<span>Erreur de chargement du ticket.</span>`;
+      }
+    };
+
+    window.closeTicketModal = () => {
+      document.getElementById('ticket-modal').style.display = 'none';
+      document.getElementById('modal-ticket-img').src = '';
+    };
+
+    // Fermeture avec Échap
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeTicketModal();
+        closeDepotModal();
+        closeCommandeModal();
+      }
+    });
+  </script>
+</body>
+</html>

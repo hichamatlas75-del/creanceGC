@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function isCaisse() {
+      return request.auth != null &&
+        get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role == 'caisse';
+    }
+
+    // Profils : chaque client crée le sien (role client uniquement)
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isCaisse());
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.role == 'client';
+      allow update: if isCaisse();
+    }
+
+    // Mouvements : dépôts / commandes
+    match /transactions/{id} {
+      allow read: if request.auth != null &&
+        (resource.data.clientId == request.auth.uid || isCaisse());
+      allow create: if request.auth != null && (
+        isCaisse() ||
+        (request.resource.data.clientId == request.auth.uid
+          && request.resource.data.type == 'commande'
+          && request.resource.data.statut == 'en_attente'));
+      allow update: if isCaisse();
+    }
+
+    // Photos des tickets (même id que la transaction)
+    match /tickets/{id} {
+      allow read: if request.auth != null &&
+        (resource.data.clientId == request.auth.uid || isCaisse());
+      allow create: if request.auth != null && request.resource.data.clientId == request.auth.uid;
+    }
+  }
+}
