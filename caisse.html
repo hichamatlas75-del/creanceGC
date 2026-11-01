@@ -1020,6 +1020,25 @@
     </div>
   </div>
 
+  <!-- MODAL HISTORIQUE CLIENT -->
+  <div id="history-modal" class="modal-overlay" onclick="closeClientHistoryModal(event)">
+    <div class="modal-card" style="max-width: 520px; max-height: 85vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">Historique Client</div>
+        <button class="modal-close" onclick="closeClientHistoryModal()">✕</button>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline;">
+        <span id="history-modal-client-name" style="color: var(--text-ivory); font-weight: 600; font-size: 15px;">-</span>
+        <span>Solde : <strong id="history-modal-client-balance" style="color: var(--accent-brass); font-family: var(--font-serif); font-size: 16px;">0,00 DH</strong></span>
+      </div>
+
+      <div id="history-modal-list" class="items-list" style="overflow-y: auto; max-height: 55vh; padding-right: 4px;">
+        <div class="empty-state">Chargement des mouvements...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ÉCRAN CONNEXION CAISSE -->
   <div id="auth-screen" class="auth-wrapper">
     <div class="auth-brand-logo">
@@ -1161,9 +1180,19 @@
       <!-- ONGLET 3 : JOURNAL -->
       <section id="pane-journal" class="tab-pane">
         <div class="card">
-          <div class="card-title" style="margin-bottom: 14px; font-size: 18px; color: var(--accent-brass); display: flex; justify-content: space-between;">
+          <div class="card-title" style="margin-bottom: 14px; font-size: 18px; color: var(--accent-brass); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span>Journal des 200 derniers mouvements</span>
-            <span id="journal-count-label" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 mouvement</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span id="journal-count-label" style="font-size: 12px; font-family: var(--font-sans); color: var(--text-muted); font-weight: normal;">0 mouvement</span>
+              <button type="button" class="btn-action btn-ticket" style="padding: 5px 12px; font-size: 12px;" onclick="exportJournalCSV()" title="Exporter en fichier Excel / CSV">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export CSV
+              </button>
+            </div>
           </div>
 
           <div id="journal-list" class="items-list">
@@ -1442,29 +1471,36 @@
       });
     }
 
-    // Recalcul des soldes et rendu global
+    // Recalcul des soldes et rendu global (calcul en centimes entiers sans dérive flottante)
     function recomputeAndRender() {
-      // Calcul des soldes clients et totaux généraux
-      const clientBalances = new Map();
-      let totalDepots = 0;
-      let totalConsomme = 0;
+      const clientBalancesCents = new Map();
+      let totalDepotsCents = 0;
+      let totalConsommeCents = 0;
 
       transactionsList.forEach((t) => {
         if (t.statut === 'valide') {
-          const m = Number(t.montant) || 0;
-          const currentBal = clientBalances.get(t.clientId) || 0;
+          const mCents = Math.round((Number(t.montant) || 0) * 100);
+          const currentBalCents = clientBalancesCents.get(t.clientId) || 0;
           if (t.type === 'depot') {
-            totalDepots += m;
-            clientBalances.set(t.clientId, currentBal + m);
+            totalDepotsCents += mCents;
+            clientBalancesCents.set(t.clientId, currentBalCents + mCents);
           } else if (t.type === 'commande') {
-            totalConsomme += m;
-            clientBalances.set(t.clientId, currentBal - m);
+            totalConsommeCents += mCents;
+            clientBalancesCents.set(t.clientId, currentBalCents - mCents);
           }
         }
       });
 
+      const clientBalances = new Map();
+      clientBalancesCents.forEach((cents, clientId) => {
+        clientBalances.set(clientId, cents / 100);
+      });
+
+      const totalDepots = totalDepotsCents / 100;
+      const totalConsomme = totalConsommeCents / 100;
+      const soldeDu = (totalDepotsCents - totalConsommeCents) / 100;
+
       // 1. Bandeau de statistiques
-      const soldeDu = totalDepots - totalConsomme;
       document.getElementById('stat-depots').textContent = formatDH(totalDepots);
       document.getElementById('stat-consomme').textContent = formatDH(totalConsomme);
       document.getElementById('stat-solde-du').textContent = formatDH(soldeDu);
@@ -1535,13 +1571,13 @@
             </div>
             <div class="item-actions">
               ${ticketBtnHtml}
-              <button type="button" class="btn-action btn-valider" onclick="validerCommande('${escapeHtml(t.id)}')">
+              <button type="button" class="btn-action btn-valider" onclick="validerCommande('${escapeHtml(t.id)}', this)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 Valider
               </button>
-              <button type="button" class="btn-action btn-rejeter" onclick="rejeterCommande('${escapeHtml(t.id)}')">
+              <button type="button" class="btn-action btn-rejeter" onclick="rejeterCommande('${escapeHtml(t.id)}', this)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1556,8 +1592,12 @@
       container.innerHTML = html;
     }
 
-    // Validation d'une commande
-    window.validerCommande = async (id) => {
+    // Validation d'une commande avec protection anti-double-clic
+    window.validerCommande = async (id, btn) => {
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+      }
       try {
         await updateDoc(doc(db, 'transactions', id), {
           statut: 'valide'
@@ -1565,13 +1605,21 @@
       } catch (err) {
         console.error("Valider commande error:", err);
         alert("Erreur lors de la validation : " + err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
       }
     };
 
-    // Rejet d'une commande
-    window.rejeterCommande = async (id) => {
+    // Rejet d'une commande avec protection anti-double-clic
+    window.rejeterCommande = async (id, btn) => {
       if (!confirm("Voulez-vous rejeter ce ticket ? Le montant ne sera pas débité.")) {
         return;
+      }
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
       }
       try {
         await updateDoc(doc(db, 'transactions', id), {
@@ -1580,6 +1628,10 @@
       } catch (err) {
         console.error("Rejeter commande error:", err);
         alert("Erreur lors du rejet : " + err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
       }
     };
 
@@ -1633,6 +1685,9 @@
               </div>
             </div>
             <div class="item-actions">
+              <button type="button" class="btn-action btn-ticket" style="padding: 6px 10px; font-size: 12px;" onclick="openClientHistoryModal('${escapeHtml(client.id)}', '${escapeHtml(displayName)}', ${bal})" title="Voir les mouvements de ce client">
+                Historique
+              </button>
               <button type="button" class="btn-action btn-depot" onclick="openDepotModal('${escapeHtml(client.id)}', '${escapeHtml(displayName)}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1745,9 +1800,14 @@
       e.preventDefault();
       if (!activeModalClientId) return;
 
-      const amountVal = parseFloat(document.getElementById('depot-amount').value);
+      const rawVal = String(document.getElementById('depot-amount').value || '').trim().replace(',', '.');
+      const amountVal = parseFloat(rawVal);
       if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
         alert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+      if (amountVal > 50000) {
+        alert("Le montant d'un dépôt ne peut pas dépasser 50 000 DH.");
         return;
       }
 
@@ -1794,7 +1854,8 @@
     };
 
     window.checkCommandeOverrun = () => {
-      const val = parseFloat(document.getElementById('commande-amount').value) || 0;
+      const rawVal = String(document.getElementById('commande-amount').value || '').trim().replace(',', '.');
+      const val = parseFloat(rawVal) || 0;
       const warningBox = document.getElementById('commande-overrun-warning');
       if (val > activeModalClientBalance) {
         warningBox.style.display = 'block';
@@ -1807,9 +1868,14 @@
       e.preventDefault();
       if (!activeModalClientId) return;
 
-      const amountVal = parseFloat(document.getElementById('commande-amount').value);
+      const rawVal = String(document.getElementById('commande-amount').value || '').trim().replace(',', '.');
+      const amountVal = parseFloat(rawVal);
       if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
         alert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+      if (amountVal > 20000) {
+        alert("Le montant d'une commande ne peut pas dépasser 20 000 DH.");
         return;
       }
 
@@ -1844,6 +1910,93 @@
         btn.disabled = false;
         btn.textContent = "Valider le débit";
       }
+    };
+
+    // Exportation du journal en fichier CSV (UTF-8 avec BOM pour compatibilité Excel)
+    window.exportJournalCSV = () => {
+      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete');
+      if (validHistory.length === 0) {
+        alert("Aucun mouvement à exporter.");
+        return;
+      }
+      validHistory.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      let csv = "\uFEFFDate;Heure;Client;Type;Montant (DH);Statut\r\n";
+      validHistory.forEach((t) => {
+        const d = t.createdAt ? new Date(t.createdAt) : new Date();
+        const dateStr = d.toLocaleDateString('fr-FR');
+        const heureStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const clientObj = usersMap.get(t.clientId);
+        const clientName = clientObj ? (clientObj.nom || clientObj.username) : t.clientId;
+        const typeStr = t.type === 'depot' ? 'Dépôt' : 'Commande';
+        const montantStr = Number(t.montant || 0).toFixed(2).replace('.', ',');
+        const statutStr = t.statut === 'valide' ? 'Validé' : 'En attente';
+
+        csv += `"${dateStr}";"${heureStr}";"${clientName.replace(/"/g, '""')}";"${typeStr}";"${montantStr}";"${statutStr}"\r\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      const todayStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute('download', `journal-caisse-greycorner-${todayStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
+    // Modal Historique Client
+    window.openClientHistoryModal = (clientId, clientName, currentBalance) => {
+      document.getElementById('history-modal-client-name').textContent = clientName;
+      document.getElementById('history-modal-client-balance').textContent = formatDH(currentBalance);
+      const listContainer = document.getElementById('history-modal-list');
+
+      // Filtrer toutes les transactions de ce client
+      const clientTransactions = transactionsList.filter(t => t.clientId === clientId);
+      clientTransactions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (clientTransactions.length === 0) {
+        listContainer.innerHTML = `<div class="empty-state">Aucun mouvement pour ce client.</div>`;
+      } else {
+        let html = '';
+        clientTransactions.forEach((t) => {
+          const isDepot = t.type === 'depot';
+          const sign = isDepot ? '+' : '−';
+          const amountColor = isDepot ? 'var(--accent-green)' : 'var(--accent-red)';
+          const typeBadge = isDepot ? '<span class="badge badge-depot">Dépôt</span>' : '<span class="badge badge-commande">Commande</span>';
+          let statusBadge = '<span class="badge badge-valide">Validé</span>';
+          if (t.statut === 'en_attente') statusBadge = '<span class="badge badge-attente">En attente</span>';
+          else if (t.statut === 'rejete') statusBadge = '<span class="badge" style="background: rgba(196,101,90,0.2); color: var(--accent-red);">Rejeté</span>';
+
+          html += `
+            <div class="item-card" style="padding: 10px 12px; margin-bottom: 8px;">
+              <div class="item-info">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                  ${typeBadge}
+                  ${statusBadge}
+                </div>
+                <div class="item-sub">${escapeHtml(formatDate(t.createdAt))}</div>
+              </div>
+              <div class="item-actions">
+                <strong style="color: ${amountColor}; font-family: var(--font-serif); font-size: 15px;">
+                  ${sign}${escapeHtml(formatDH(t.montant))}
+                </strong>
+                ${t.hasTicket ? `<button type="button" class="btn-action btn-ticket" style="padding: 3px 6px; font-size: 10px;" onclick="closeClientHistoryModal(); openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">Ticket</button>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        listContainer.innerHTML = html;
+      }
+
+      document.getElementById('history-modal').style.display = 'flex';
+    };
+
+    window.closeClientHistoryModal = () => {
+      const modal = document.getElementById('history-modal');
+      if (modal) modal.style.display = 'none';
     };
 
     // Modal Visualisation Ticket avec rotation, zoom et lecteur OCR
@@ -1917,21 +2070,23 @@
       });
     }
 
-    // Extraction robuste du montant Total TTC
+    // Extraction robuste du montant Total TTC (harmonisée)
     function parseTotalFromReceiptText(text) {
       if (!text) return null;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-      const patterns = [
-        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global|payer)?\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /total\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /total.*?([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global)?\s*[:=\s]*([0-9]{1,5})(?:\s*dh|\s*mad)?$/i
+      // Priorité 1 : Lignes explicites ciblant "TOTAL TTC", "NET A PAYER", etc.
+      const priorityPats = [
+        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})(?:\s*dh|\s*mad)?/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i
       ];
 
       for (const line of lines) {
-        for (const regex of patterns) {
+        if (/sous[- ]*total|total\s*ht|base\s*ht|tva|remise/i.test(line) && !/total\s*ttc/i.test(line)) {
+          continue;
+        }
+        for (const regex of priorityPats) {
           const match = line.match(regex);
           if (match && match[1]) {
             const clean = match[1].replace(/\s/g, '').replace(',', '.');
@@ -1944,23 +2099,22 @@
       }
 
       const fullText = text.replace(/\r/g, ' ');
-      const totalIdx = fullText.toLowerCase().lastIndexOf('total');
-      if (totalIdx !== -1) {
-        const snippet = fullText.slice(totalIdx, totalIdx + 120);
-        const m = snippet.match(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/);
-        if (m && m[1]) {
-          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
+      const totalMatches = [...fullText.matchAll(/(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/gi)];
+      if (totalMatches.length > 0) {
+        const lastMatch = totalMatches[totalMatches.length - 1];
+        if (lastMatch && lastMatch[1]) {
+          const num = parseFloat(lastMatch[1].replace(/\s/g, '').replace(',', '.'));
           if (!isNaN(num) && num > 0) return num;
         }
       }
 
       const candidateNumbers = [];
-      const bottomLines = lines.slice(Math.max(0, lines.length - 8));
+      const bottomLines = lines.slice(Math.max(0, lines.length - 10));
       for (const line of bottomLines) {
-        if (/tel|wifi|ice/i.test(line)) continue;
-        const matches = line.matchAll(/([0-9]{1,5}[.,][0-9]{2})/g);
+        if (/tel|wifi|ice|rc|patente|if|date|heure|table|serveur|couvert/i.test(line)) continue;
+        const matches = line.matchAll(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/g);
         for (const m of matches) {
-          const num = parseFloat(m[1].replace(',', '.'));
+          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
           if (!isNaN(num) && num > 0 && num < 50000) {
             candidateNumbers.push(num);
           }
@@ -1974,6 +2128,33 @@
       return null;
     }
 
+    // Instance unique réutilisable du worker Tesseract Caisse
+    let caisseOcrWorkerInstance = null;
+    let caisseOcrWorkerPromise = null;
+
+    async function getOrCreateCaisseOcrWorker() {
+      if (caisseOcrWorkerInstance) return caisseOcrWorkerInstance;
+      if (caisseOcrWorkerPromise) return caisseOcrWorkerPromise;
+
+      caisseOcrWorkerPromise = (async () => {
+        if (typeof Tesseract === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
+            document.head.appendChild(s);
+          });
+        }
+        const worker = await Tesseract.createWorker('eng');
+        caisseOcrWorkerInstance = worker;
+        caisseOcrWorkerPromise = null;
+        return worker;
+      })();
+
+      return caisseOcrWorkerPromise;
+    }
+
     window.runCaisseTicketOcr = async () => {
       const banner = document.getElementById('caisse-ocr-result');
       const label = document.getElementById('caisse-ocr-label');
@@ -1985,20 +2166,9 @@
       if (label) label.textContent = "Lecture...";
 
       try {
-        if (typeof Tesseract === 'undefined') {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-            s.onload = resolve;
-            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
-            document.head.appendChild(s);
-          });
-        }
-
+        const worker = await getOrCreateCaisseOcrWorker();
         const processedCanvas = await prepareTicketForOcr(currentTicketDataUrl);
-        const worker = await Tesseract.createWorker('eng');
         const ret = await worker.recognize(processedCanvas);
-        await worker.terminate();
 
         const rawText = ret && ret.data && ret.data.text ? ret.data.text : '';
         console.log("Texte extrait (Caisse OCR) :", rawText);
@@ -2092,6 +2262,15 @@
         closeTicketModal();
         closeDepotModal();
         closeCommandeModal();
+        closeClientHistoryModal();
+      }
+    });
+
+    // Libération mémoire du worker OCR à la fermeture de la page
+    window.addEventListener('beforeunload', () => {
+      if (caisseOcrWorkerInstance) {
+        try { caisseOcrWorkerInstance.terminate(); } catch (e) {}
+        caisseOcrWorkerInstance = null;
       }
     });
   </script>

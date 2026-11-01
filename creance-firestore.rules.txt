@@ -7,7 +7,6 @@ service cloud.firestore {
         get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role == 'caisse';
     }
 
-    // Profils : chaque client crée le sien (role client uniquement)
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isCaisse());
       allow create: if request.auth != null && request.auth.uid == uid
@@ -15,23 +14,37 @@ service cloud.firestore {
       allow update: if isCaisse();
     }
 
-    // Mouvements : dépôts / commandes
     match /transactions/{id} {
       allow read: if request.auth != null &&
         (resource.data.clientId == request.auth.uid || isCaisse());
+      
+      // Sécurisation stricte de la création : contrôle du type, statut, et montant
       allow create: if request.auth != null && (
         isCaisse() ||
         (request.resource.data.clientId == request.auth.uid
           && request.resource.data.type == 'commande'
-          && request.resource.data.statut == 'en_attente'));
+          && request.resource.data.statut == 'en_attente'
+          && request.resource.data.montant is number
+          && request.resource.data.montant > 0
+          && request.resource.data.montant <= 20000
+          && request.resource.data.hasTicket == true)
+      );
+
+      // Seule la caisse peut valider ou rejeter
       allow update: if isCaisse();
+      allow delete: if isCaisse();
     }
 
-    // Photos des tickets (même id que la transaction)
     match /tickets/{id} {
       allow read: if request.auth != null &&
         (resource.data.clientId == request.auth.uid || isCaisse());
-      allow create: if request.auth != null && request.resource.data.clientId == request.auth.uid;
+      
+      // Limite de taille stricte (< 1 Mo) pour empêcher le blocage de Firestore
+      allow create: if request.auth != null
+                    && request.resource.data.clientId == request.auth.uid
+                    && request.resource.data.img is string
+                    && request.resource.data.img.size() < 1000000;
+      allow delete: if isCaisse();
     }
   }
 }

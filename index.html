@@ -11,28 +11,52 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
-      --bg: #14120f;
-      --bg-card: #1f1b16;
-      --bg-card-hover: #26211c;
-      --bg-input: #181512;
-      --border: #3a3329;
-      --border-focus: #c3a15b;
-      --text-ivory: #f3ecdc;
-      --text-muted: #9e9484;
-      --accent-brass: #c3a15b;
-      --accent-brass-hover: #d8b66f;
-      --accent-green: #6fae7a;
-      --accent-green-bg: rgba(111, 174, 122, 0.12);
-      --accent-red: #c4655a;
-      --accent-red-bg: rgba(196, 101, 90, 0.12);
-      --accent-amber: #d4a359;
-      --accent-amber-bg: rgba(212, 163, 89, 0.15);
+      /* Palette Grey Corner — Élégance sombre & Or brossé */
+      --bg: #0f0d0b;
+      --bg-card: #181512;
+      --bg-card-elevated: #221d17;
+      --bg-card-hover: #262019;
+      --bg-input: #12100d;
+      
+      --border: #332b21;
+      --border-subtle: #252019;
+      --border-focus: #d4af37;
+      
+      --text-ivory: #f7f3e8;
+      --text-soft: #dcd4c3;
+      --text-muted: #9e9382;
+      --text-subtle: #6e6456;
+      
+      --accent-brass: #d4af37;
+      --accent-brass-hover: #e5c358;
+      --accent-brass-light: rgba(212, 175, 55, 0.12);
+      --accent-brass-glow: rgba(212, 175, 55, 0.25);
+      
+      --accent-green: #4ade80;
+      --accent-green-bg: rgba(74, 222, 128, 0.12);
+      --accent-green-border: rgba(74, 222, 128, 0.3);
+      
+      --accent-red: #f87171;
+      --accent-red-bg: rgba(248, 113, 113, 0.12);
+      --accent-red-border: rgba(248, 113, 113, 0.3);
+      
+      --accent-amber: #fbbf24;
+      --accent-amber-bg: rgba(251, 191, 36, 0.14);
+      --accent-amber-border: rgba(251, 191, 36, 0.35);
+      
       --font-serif: 'Cormorant Garamond', Georgia, serif;
       --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      
+      --radius-xl: 20px;
       --radius-lg: 16px;
-      --radius-md: 10px;
-      --radius-sm: 6px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      --shadow-glow: 0 0 35px rgba(212, 175, 55, 0.15);
+      
+      --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -40,6 +64,11 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      font-size: 15px;
+      -webkit-text-size-adjust: 100%;
     }
 
     body {
@@ -50,22 +79,27 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: max(env(safe-area-inset-bottom), 24px);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
     }
 
-    /* En-tête */
+    /* En-tête Sticky */
     header {
-      background: linear-gradient(180deg, rgba(31, 27, 22, 0.95) 0%, rgba(20, 18, 15, 0.8) 100%);
-      backdrop-filter: blur(10px);
+      background: rgba(18, 15, 12, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 14px 20px;
+      padding: 12px 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .header-inner {
-      max-width: 580px;
+      max-width: 540px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -79,111 +113,158 @@
 
     .brand-title {
       font-family: var(--font-serif);
-      font-size: 22px;
+      font-size: 23px;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 2.2px;
       color: var(--accent-brass);
       text-transform: uppercase;
       line-height: 1.1;
+      text-shadow: 0 2px 10px rgba(212, 175, 55, 0.25);
     }
 
     .brand-subtitle {
       font-size: 10px;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 1px;
+      font-weight: 500;
     }
 
     .user-pill {
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(195, 161, 91, 0.08);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
-      padding: 6px 12px;
+      padding: 5px 12px 5px 14px;
       border-radius: 30px;
       font-size: 13px;
+      box-shadow: var(--shadow-sm);
     }
 
     .user-name {
       color: var(--text-ivory);
-      font-weight: 500;
-      max-width: 120px;
+      font-weight: 600;
+      max-width: 130px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      letter-spacing: 0.2px;
     }
 
     .btn-quit {
-      background: transparent;
-      border: none;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.25);
       color: var(--accent-red);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 6px;
+      gap: 5px;
+      padding: 4px 8px;
       border-radius: var(--radius-sm);
-      transition: all 0.2s;
+      transition: var(--transition);
     }
 
     .btn-quit:hover {
-      background: var(--accent-red-bg);
+      background: var(--accent-red);
+      color: #12100d;
+      border-color: var(--accent-red);
+      transform: translateY(-1px);
     }
 
     /* Conteneur principal */
     main {
       flex: 1;
-      max-width: 580px;
+      max-width: 540px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px 16px 40px;
+      padding: 18px 16px 36px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
     }
 
     /* Cartes */
     .card {
-      background: var(--bg-card);
+      background: linear-gradient(180deg, var(--bg-card) 0%, rgba(20, 17, 14, 0.95) 100%);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-xl);
       padding: 22px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-card);
       position: relative;
       overflow: hidden;
+      transition: var(--transition);
     }
 
     .card::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(195, 161, 91, 0.35), transparent);
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
     }
 
     .card-title {
       font-family: var(--font-serif);
-      font-size: 20px;
+      font-size: 21px;
       font-weight: 600;
       color: var(--accent-brass);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    /* Carte Solde */
+    /* CARTE SOLDE HERO */
     .balance-card {
       text-align: center;
-      padding: 30px 20px;
-      background: radial-gradient(circle at top, rgba(195, 161, 91, 0.08) 0%, var(--bg-card) 75%);
+      padding: 28px 20px 24px;
+      background: radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.12) 0%, rgba(24, 21, 18, 0.98) 75%);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: var(--shadow-glow), var(--shadow-card);
+    }
+
+    .balance-header-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .balance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-brass);
+      font-weight: 600;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 0 rgba(74, 222, 128, 0.5);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+      70% { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
     }
 
     .balance-label {
@@ -191,41 +272,59 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      font-weight: 500;
     }
 
     .balance-amount {
       font-family: var(--font-serif);
-      font-size: 46px;
+      font-size: 48px;
       font-weight: 700;
-      color: var(--accent-brass);
+      color: var(--text-ivory);
       line-height: 1.1;
-      margin-bottom: 12px;
-      text-shadow: 0 4px 20px rgba(195, 161, 91, 0.25);
+      margin: 4px 0 16px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.2);
     }
 
     .balance-notice {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       font-size: 12px;
       color: var(--text-muted);
       line-height: 1.4;
-      max-width: 320px;
+      max-width: 360px;
       margin: 0 auto;
-      border-top: 1px dashed rgba(58, 51, 41, 0.7);
-      padding-top: 12px;
+      border-top: 1px dashed rgba(212, 175, 55, 0.2);
+      padding-top: 14px;
+      width: 100%;
+    }
+
+    .balance-notice svg {
+      color: var(--accent-brass);
+      flex-shrink: 0;
     }
 
     /* Formulaires */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     label {
       display: block;
       font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-bottom: 7px;
+      letter-spacing: 0.4px;
+    }
+
+    .input-with-currency {
+      position: relative;
+      display: flex;
+      align-items: center;
     }
 
     input[type="text"],
@@ -233,47 +332,72 @@
     input[type="number"] {
       width: 100%;
       background: var(--bg-input);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 13px 14px;
-      font-size: 15px;
+      padding: 14px 16px;
+      font-size: 16px; /* Empêche l'auto-zoom forcé sur Safari iOS */
       color: var(--text-ivory);
       font-family: var(--font-sans);
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: var(--transition);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .input-with-currency input {
+      padding-right: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      color: var(--accent-brass);
+      letter-spacing: 0.5px;
+    }
+
+    .currency-label {
+      position: absolute;
+      right: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      pointer-events: none;
+      font-family: var(--font-serif);
+      letter-spacing: 1px;
     }
 
     input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(195, 161, 91, 0.15);
+      background: #16130f;
+      box-shadow: 0 0 0 3px var(--accent-brass-glow), inset 0 2px 4px rgba(0, 0, 0, 0.4);
     }
 
     input::placeholder {
-      color: rgba(158, 148, 132, 0.45);
+      color: rgba(158, 147, 130, 0.4);
+      font-size: 15px;
+      font-weight: 400;
     }
 
-    /* Sélecteur photo mobile */
+    /* Sélecteur photo mobile & Zone d'upload */
     .photo-upload-zone {
       position: relative;
-      border: 1.5px dashed var(--border);
-      border-radius: var(--radius-md);
-      background: rgba(24, 21, 18, 0.6);
-      padding: 18px 14px;
+      border: 2px dashed rgba(212, 175, 55, 0.35);
+      border-radius: var(--radius-lg);
+      background: rgba(212, 175, 55, 0.03);
+      padding: 22px 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
-      min-height: 80px;
+      transition: var(--transition);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 10px;
+      min-height: 120px;
     }
 
     .photo-upload-zone:hover,
-    .photo-upload-zone.dragover {
+    .photo-upload-zone:active {
       border-color: var(--accent-brass);
-      background: rgba(195, 161, 91, 0.04);
+      background: rgba(212, 175, 55, 0.08);
+      transform: translateY(-1px);
     }
 
     .photo-upload-zone input[type="file"] {
@@ -283,18 +407,44 @@
       width: 100%;
       height: 100%;
       cursor: pointer;
+      z-index: 2;
+    }
+
+    .upload-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-brass);
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+    }
+
+    .photo-upload-zone:hover .upload-icon-wrapper {
+      transform: scale(1.08);
+      background: rgba(212, 175, 55, 0.2);
     }
 
     .upload-icon {
-      width: 32px;
-      height: 32px;
-      color: var(--accent-brass);
+      width: 24px;
+      height: 24px;
+    }
+
+    .upload-text-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
 
     .upload-hint {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-ivory);
-      font-weight: 500;
+      font-weight: 600;
+      letter-spacing: 0.2px;
     }
 
     .upload-subhint {
@@ -302,117 +452,161 @@
       color: var(--text-muted);
     }
 
+    /* Aperçu de la photo sélectionnée */
     .preview-container {
       position: relative;
       width: 100%;
-      margin-top: 10px;
-      border-radius: var(--radius-md);
+      margin-top: 12px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
+      background: #000;
+      box-shadow: var(--shadow-sm);
       display: none;
     }
 
     .preview-img {
       width: 100%;
-      max-height: 220px;
+      max-height: 250px;
       object-fit: contain;
-      background: #000;
       display: block;
+      background: #000;
     }
 
     .preview-remove-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(20, 18, 15, 0.85);
+      top: 10px;
+      right: 10px;
+      background: rgba(18, 15, 12, 0.85);
       color: var(--accent-red);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(248, 113, 113, 0.35);
       border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 16px;
       cursor: pointer;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(8px);
+      transition: var(--transition);
+      z-index: 10;
     }
 
-    /* Boutons */
+    .preview-remove-btn:hover {
+      background: var(--accent-red);
+      color: #fff;
+      transform: scale(1.08);
+    }
+
+    .btn-rescan {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 15, 12, 0.92);
+      color: var(--accent-brass);
+      border: 1px solid var(--accent-brass);
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+      transition: var(--transition);
+      white-space: nowrap;
+      z-index: 5;
+    }
+
+    .btn-rescan:hover {
+      background: var(--accent-brass);
+      color: #12100d;
+      transform: translateX(-50%) translateY(-1px);
+    }
+
+    /* Boutons Principaux */
     .btn {
       width: 100%;
-      min-height: 48px;
+      min-height: 52px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      background: linear-gradient(135deg, var(--accent-brass) 0%, #aa8945 100%);
-      color: #14120f;
+      gap: 10px;
+      background: linear-gradient(135deg, #dfbe75 0%, #c3a15b 50%, #9e7f3a 100%);
+      color: #12100d;
       border: none;
       border-radius: var(--radius-md);
       font-family: var(--font-sans);
       font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(195, 161, 91, 0.25);
-      transition: all 0.2s;
+      box-shadow: 0 4px 18px rgba(212, 175, 55, 0.3);
+      transition: var(--transition);
     }
 
     .btn:hover:not(:disabled) {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(212, 175, 55, 0.45);
     }
 
     .btn:active:not(:disabled) {
-      transform: translateY(0);
+      transform: scale(0.98);
+      filter: brightness(0.95);
     }
 
     .btn:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
       box-shadow: none;
+      transform: none;
     }
 
     .btn-secondary {
-      background: rgba(195, 161, 91, 0.1);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--accent-brass);
       border: 1px solid var(--border);
       box-shadow: none;
     }
 
     .btn-secondary:hover:not(:disabled) {
-      background: rgba(195, 161, 91, 0.18);
+      background: rgba(212, 175, 55, 0.12);
+      border-color: var(--accent-brass);
+      color: #fff;
     }
 
-    /* Auth screen */
+    /* Écran d'authentification */
     .auth-wrapper {
       max-width: 420px;
       width: 100%;
-      margin: 30px auto;
+      margin: 40px auto 20px;
       padding: 0 16px;
     }
 
     .auth-brand-logo {
       text-align: center;
-      margin-bottom: 26px;
+      margin-bottom: 28px;
     }
 
     .auth-brand-title {
       font-family: var(--font-serif);
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 700;
-      letter-spacing: 3px;
+      letter-spacing: 3.5px;
       color: var(--accent-brass);
       text-transform: uppercase;
+      text-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
     }
 
     .auth-brand-sub {
       font-size: 11px;
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       color: var(--text-muted);
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 5px;
+      font-weight: 500;
     }
 
     .auth-tabs {
@@ -421,12 +615,12 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .auth-tab {
       flex: 1;
-      padding: 10px;
+      padding: 11px;
       background: transparent;
       border: none;
       color: var(--text-muted);
@@ -435,37 +629,89 @@
       font-weight: 600;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
     }
 
     .auth-tab.active {
       background: var(--accent-brass);
-      color: #14120f;
+      color: #12100d;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 
     /* Alertes & Notifications */
     .alert {
-      padding: 12px 14px;
+      padding: 14px 16px;
       border-radius: var(--radius-md);
       font-size: 13px;
-      line-height: 1.4;
-      margin-bottom: 16px;
+      line-height: 1.45;
+      margin-bottom: 18px;
       display: none;
+      animation: fadeIn 0.25s ease-out;
     }
 
     .alert-error {
       background: var(--accent-red-bg);
-      border: 1px solid rgba(196, 101, 90, 0.4);
-      color: #e59086;
+      border: 1px solid var(--accent-red-border);
+      color: #fca5a5;
     }
 
     .alert-success {
       background: var(--accent-green-bg);
-      border: 1px solid rgba(111, 174, 122, 0.4);
-      color: #9cd1a4;
+      border: 1px solid var(--accent-green-border);
+      color: #86efac;
     }
 
-    /* Historique */
+    /* Barre d'onglets filtre Historique */
+    .history-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      background: #12100d;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .history-filter-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .history-filter-btn.active {
+      background: var(--bg-card-elevated);
+      color: var(--accent-brass);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .history-filter-badge {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .history-filter-btn.active .history-filter-badge {
+      background: rgba(212, 175, 55, 0.2);
+      color: var(--accent-brass);
+    }
+
+    /* Liste Historique & Éléments */
     .history-list {
       display: flex;
       flex-direction: column;
@@ -477,15 +723,18 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(24, 21, 18, 0.7);
+      background: rgba(24, 20, 16, 0.85);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      transition: border-color 0.2s;
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      transition: var(--transition);
+      position: relative;
     }
 
     .history-item:hover {
-      border-color: rgba(195, 161, 91, 0.3);
+      border-color: rgba(212, 175, 55, 0.4);
+      background: var(--bg-card-hover);
+      transform: translateY(-1px);
     }
 
     .history-left {
@@ -496,13 +745,13 @@
     }
 
     .history-icon {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
       flex-shrink: 0;
     }
@@ -510,19 +759,19 @@
     .history-icon.depot {
       background: var(--accent-green-bg);
       color: var(--accent-green);
-      border: 1px solid rgba(111, 174, 122, 0.3);
+      border: 1.5px solid var(--accent-green-border);
     }
 
     .history-icon.commande {
       background: var(--accent-red-bg);
       color: var(--accent-red);
-      border: 1px solid rgba(196, 101, 90, 0.3);
+      border: 1.5px solid var(--accent-red-border);
     }
 
     .history-details {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
       min-width: 0;
     }
 
@@ -543,11 +792,11 @@
     .history-badge {
       display: inline-block;
       font-size: 10px;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 20px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       margin-top: 3px;
       width: fit-content;
     }
@@ -555,19 +804,19 @@
     .history-badge.en_attente {
       background: var(--accent-amber-bg);
       color: var(--accent-amber);
-      border: 1px solid rgba(212, 163, 89, 0.4);
+      border: 1px solid var(--accent-amber-border);
     }
 
     .history-badge.valide {
       background: var(--accent-green-bg);
       color: var(--accent-green);
-      border: 1px solid rgba(111, 174, 122, 0.3);
+      border: 1px solid var(--accent-green-border);
     }
 
     .history-badge.rejete {
       background: var(--accent-red-bg);
       color: var(--accent-red);
-      border: 1px solid rgba(196, 101, 90, 0.3);
+      border: 1px solid var(--accent-red-border);
     }
 
     .history-right {
@@ -580,9 +829,10 @@
 
     .history-amount {
       font-family: var(--font-serif);
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       white-space: nowrap;
+      letter-spacing: 0.3px;
     }
 
     .history-amount.depot {
@@ -594,24 +844,9 @@
     }
 
     .btn-ticket-sm {
-      background: rgba(195, 161, 91, 0.1);
-      border: 1px solid var(--border);
+      background: rgba(212, 175, 55, 0.1);
       color: var(--accent-brass);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 9px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-
-    .btn-ticket-sm {
-      background: rgba(195, 161, 91, 0.12);
-      color: var(--accent-brass);
-      border: 1px solid rgba(195, 161, 91, 0.35);
+      border: 1px solid rgba(212, 175, 55, 0.3);
       border-radius: 6px;
       padding: 5px 10px;
       font-size: 11px;
@@ -620,88 +855,40 @@
       align-items: center;
       gap: 5px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       white-space: nowrap;
     }
 
     .btn-ticket-sm:hover {
-      background: rgba(195, 161, 91, 0.25);
+      background: var(--accent-brass);
+      color: #12100d;
       border-color: var(--accent-brass);
-      color: #fff;
-    }
-
-    .history-filter-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      background: var(--bg);
-      padding: 4px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-    }
-
-    .history-filter-btn {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .history-filter-btn.active {
-      background: var(--bg-card);
-      color: var(--accent-brass);
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(195, 161, 91, 0.3);
-    }
-
-    .history-filter-badge {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 1px 7px;
-      border-radius: 10px;
-      font-size: 11px;
-    }
-
-    .history-filter-btn.active .history-filter-badge {
-      background: rgba(195, 161, 91, 0.2);
-      color: var(--accent-brass);
     }
 
     .empty-state {
       text-align: center;
-      padding: 30px 10px;
+      padding: 36px 16px;
       color: var(--text-muted);
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
+      background: rgba(255, 255, 255, 0.015);
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border);
     }
 
-    /* Modal Plein Écran pour Ticket */
+    /* Modal Visualisation Ticket */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10, 8, 6, 0.94);
-      backdrop-filter: blur(10px);
+      background: rgba(8, 7, 5, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       z-index: 1000;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: 14px;
       animation: fadeIn 0.2s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     .modal-content {
@@ -721,9 +908,9 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 30px;
-      padding: 6px 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      padding: 6px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
     }
 
     .toolbar-btn {
@@ -732,18 +919,18 @@
       color: var(--text-ivory);
       font-family: var(--font-sans);
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 6px 10px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
     }
 
     .toolbar-btn:hover {
-      background: rgba(195, 161, 91, 0.15);
+      background: rgba(212, 175, 55, 0.15);
       color: var(--accent-brass);
     }
 
@@ -752,8 +939,13 @@
       font-size: 16px;
       font-weight: 700;
       border-left: 1px solid var(--border);
-      padding-left: 12px;
-      margin-left: 4px;
+      padding-left: 14px;
+      margin-left: 6px;
+    }
+
+    .toolbar-close:hover {
+      background: var(--accent-red);
+      color: #fff;
     }
 
     .modal-img-container {
@@ -763,10 +955,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.5);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.75);
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.9);
       touch-action: pan-x pan-y;
     }
 
@@ -775,7 +967,7 @@
       max-height: 78vh;
       object-fit: contain;
       display: block;
-      transition: transform 0.25s ease;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       transform-origin: center center;
     }
 
@@ -785,13 +977,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      padding: 40px;
     }
 
     .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(195, 161, 91, 0.2);
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(212, 175, 55, 0.2);
       border-top-color: var(--accent-brass);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
@@ -801,60 +994,60 @@
       to { transform: rotate(360deg); }
     }
 
-    /* OCR Styles & Feedback */
+    /* Badges & Messages OCR */
     .ocr-badge {
       font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
+      font-weight: 700;
+      padding: 3px 9px;
       border-radius: 12px;
-      background: rgba(195, 161, 91, 0.12);
+      background: rgba(212, 175, 55, 0.12);
       color: var(--accent-brass);
-      border: 1px solid rgba(195, 161, 91, 0.35);
+      border: 1px solid rgba(212, 175, 55, 0.35);
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      transition: all 0.3s;
+      transition: var(--transition);
     }
 
     .ocr-message {
       font-size: 12px;
-      margin-top: 8px;
-      padding: 10px 13px;
+      margin-top: 10px;
+      padding: 10px 14px;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       gap: 8px;
-      line-height: 1.4;
+      line-height: 1.45;
       animation: fadeIn 0.25s ease-out;
     }
 
     .ocr-message.scanning {
-      background: rgba(195, 161, 91, 0.1);
-      border: 1px solid rgba(195, 161, 91, 0.35);
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.3);
       color: var(--accent-brass);
     }
 
     .ocr-message.success {
       background: var(--accent-green-bg);
-      border: 1px solid rgba(111, 174, 122, 0.45);
-      color: #9cd1a4;
+      border: 1px solid var(--accent-green-border);
+      color: #86efac;
     }
 
     .ocr-message.notice {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       color: var(--text-muted);
     }
 
     .input-glow-success {
       border-color: var(--accent-green) !important;
-      box-shadow: 0 0 0 3px rgba(111, 174, 122, 0.25) !important;
+      box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
     }
 
     .spinner-sm {
       width: 14px;
       height: 14px;
-      border: 2px solid rgba(195, 161, 91, 0.25);
+      border: 2px solid rgba(212, 175, 55, 0.25);
       border-top-color: var(--accent-brass);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
@@ -862,30 +1055,9 @@
       flex-shrink: 0;
     }
 
-    .btn-rescan {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(20, 18, 15, 0.9);
-      color: var(--accent-brass);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-      transition: all 0.2s;
-      white-space: nowrap;
-      z-index: 5;
-    }
-
-    .btn-rescan:hover {
-      background: rgba(31, 27, 22, 0.95);
-      border-color: var(--accent-brass);
-      color: #fff;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .hidden {
@@ -1008,10 +1180,20 @@
     <main>
       <!-- Carte 1 : Solde -->
       <section class="card balance-card">
-        <div class="balance-label">Votre Solde Actuel</div>
+        <div class="balance-header-row">
+          <div class="balance-badge">
+            <span class="pulse-dot"></span>
+            <span>Solde Actuel</span>
+          </div>
+        </div>
         <div class="balance-amount" id="balance-value">0,00 DH</div>
         <div class="balance-notice">
-          Pour alimenter votre solde, faites un dépôt à la caisse.
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Pour alimenter votre solde, faites un dépôt à la caisse.</span>
         </div>
       </section>
 
@@ -1027,12 +1209,15 @@
         <form id="order-form" onsubmit="handleSendOrder(event)">
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label for="cmd-amount" style="margin-bottom: 0;">Montant du ticket (DH)</label>
+              <label for="cmd-amount" style="margin-bottom: 0;">Montant du ticket</label>
               <span id="ocr-status-badge" class="ocr-badge hidden">
                 <span class="spinner-sm"></span> <span>Lecture auto...</span>
               </span>
             </div>
-            <input type="number" id="cmd-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 366.00" required>
+            <div class="input-with-currency">
+              <input type="number" id="cmd-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required>
+              <span class="currency-label">DH</span>
+            </div>
             <div id="ocr-message" class="ocr-message hidden"></div>
           </div>
 
@@ -1040,12 +1225,16 @@
             <label>Photo du ticket de caisse</label>
             <div id="upload-zone" class="photo-upload-zone" onclick="document.getElementById('cmd-photo').click()">
               <input type="file" id="cmd-photo" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
-              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                <circle cx="12" cy="13" r="4"></circle>
-              </svg>
-              <div class="upload-hint" id="upload-hint-text">Prendre en photo le ticket</div>
-              <div class="upload-subhint">Appareil photo mobile ou fichier • Lecture auto du Total</div>
+              <div class="upload-icon-wrapper">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
+              <div class="upload-text-group">
+                <div class="upload-hint" id="upload-hint-text">Prendre en photo le ticket</div>
+                <div class="upload-subhint">Appareil photo mobile ou fichier • Lecture auto du Total</div>
+              </div>
             </div>
 
             <div id="preview-box" class="preview-container">
@@ -1179,8 +1368,8 @@
       });
     };
 
-    // Compression d'image canvas (max 1000px, jpeg 0.65 - idéal pour tickets thermiques)
-    function compressImage(file, maxDimension = 1000, quality = 0.65) {
+    // Compression d'image canvas adaptative (max 900px, jpeg 0.60 avec réduction automatique si > 800 Ko)
+    function compressImage(file, maxDimension = 900, quality = 0.60) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = () => reject(new Error("Erreur de lecture du fichier image"));
@@ -1204,7 +1393,18 @@
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+            // Sécurité anti-dépassement limite 1 Mo Firestore :
+            // Si la chaîne Base64 dépasse 800 Ko, ré-échantillonnage automatique
+            if (dataUrl.length > 800000) {
+              const canvas2 = document.createElement('canvas');
+              canvas2.width = Math.round(width * 0.75);
+              canvas2.height = Math.round(height * 0.75);
+              const ctx2 = canvas2.getContext('2d');
+              ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height);
+              dataUrl = canvas2.toDataURL('image/jpeg', 0.45);
+            }
             resolve(dataUrl);
           };
           img.src = e.target.result;
@@ -1464,26 +1664,26 @@
 
       unsubscribeTransactions = onSnapshot(q, (snapshot) => {
         const list = [];
-        let totalDepots = 0;
-        let totalCommandes = 0;
+        let totalDepotsCents = 0;
+        let totalCommandesCents = 0;
 
         snapshot.forEach((docSnap) => {
           const t = { id: docSnap.id, ...docSnap.data() };
           list.push(t);
 
-          // Seules les transactions valides comptent pour le solde
+          // Seules les transactions valides comptent pour le solde (calcul en centimes sans dérive flottante)
           if (t.statut === 'valide') {
-            const m = Number(t.montant) || 0;
+            const mCents = Math.round((Number(t.montant) || 0) * 100);
             if (t.type === 'depot') {
-              totalDepots += m;
+              totalDepotsCents += mCents;
             } else if (t.type === 'commande') {
-              totalCommandes += m;
+              totalCommandesCents += mCents;
             }
           }
         });
 
         // Solde = Dépôts validés − Commandes validées
-        const solde = totalDepots - totalCommandes;
+        const solde = (totalDepotsCents - totalCommandesCents) / 100;
         document.getElementById('balance-value').textContent = formatDH(solde);
 
         // Tri côté client par createdAt décroissant (pas d'index composite requis)
@@ -1661,17 +1861,19 @@
       if (!text) return null;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-      // Patterns prioritaires ciblant "Total TTC : 366,00", "Total : 85,00", etc.
-      const patterns = [
-        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global|payer)?\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /total\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /total.*?([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:total|totai|tot1|totl|tota)\s*(?:ttc|tic|t1c|net|global)?\s*[:=\s]*([0-9]{1,5})(?:\s*dh|\s*mad)?$/i
+      // Priorité 1 : Lignes explicites ciblant "TOTAL TTC", "NET A PAYER", etc.
+      const priorityPats = [
+        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
+        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})(?:\s*dh|\s*mad)?/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i
       ];
 
       for (const line of lines) {
-        for (const regex of patterns) {
+        // Ignorer sous-totaux, TVA ou remises si ce n'est pas expressément le Total TTC
+        if (/sous[- ]*total|total\s*ht|base\s*ht|tva|remise/i.test(line) && !/total\s*ttc/i.test(line)) {
+          continue;
+        }
+        for (const regex of priorityPats) {
           const match = line.match(regex);
           if (match && match[1]) {
             const clean = match[1].replace(/\s/g, '').replace(',', '.');
@@ -1685,21 +1887,20 @@
 
       // Recherche contextuelle autour du mot-clé TOTAL dans le texte entier
       const fullText = text.replace(/\r/g, ' ');
-      const totalIdx = fullText.toLowerCase().lastIndexOf('total');
-      if (totalIdx !== -1) {
-        const snippet = fullText.slice(totalIdx, totalIdx + 120);
-        const m = snippet.match(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/);
-        if (m && m[1]) {
-          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
+      const totalMatches = [...fullText.matchAll(/(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/gi)];
+      if (totalMatches.length > 0) {
+        const lastMatch = totalMatches[totalMatches.length - 1];
+        if (lastMatch && lastMatch[1]) {
+          const num = parseFloat(lastMatch[1].replace(/\s/g, '').replace(',', '.'));
           if (!isNaN(num) && num > 0) return num;
         }
       }
 
-      // Fallback : nombre le plus élevé parmi les dernières lignes du ticket (hors coordonnées)
+      // Fallback : nombre le plus élevé parmi les dernières lignes du ticket (hors coordonnées/tél/wifi/ice)
       const candidateNumbers = [];
-      const bottomLines = lines.slice(Math.max(0, lines.length - 8));
+      const bottomLines = lines.slice(Math.max(0, lines.length - 10));
       for (const line of bottomLines) {
-        if (/tel|wifi|ice/i.test(line)) continue;
+        if (/tel|wifi|ice|rc|patente|if|date|heure|table|serveur|couvert/i.test(line)) continue;
         const matches = line.matchAll(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/g);
         for (const m of matches) {
           const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
@@ -1714,6 +1915,33 @@
       }
 
       return null;
+    }
+
+    // Instance unique réutilisable du worker Tesseract (optimisation mémoire & vitesse)
+    let ocrWorkerInstance = null;
+    let ocrWorkerPromise = null;
+
+    async function getOrCreateOcrWorker() {
+      if (ocrWorkerInstance) return ocrWorkerInstance;
+      if (ocrWorkerPromise) return ocrWorkerPromise;
+
+      ocrWorkerPromise = (async () => {
+        if (typeof Tesseract === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
+            document.head.appendChild(s);
+          });
+        }
+        const worker = await Tesseract.createWorker('eng');
+        ocrWorkerInstance = worker;
+        ocrWorkerPromise = null;
+        return worker;
+      })();
+
+      return ocrWorkerPromise;
     }
 
     // Exécution du scan OCR automatique
@@ -1732,20 +1960,9 @@
       msgEl.classList.remove('hidden');
 
       try {
-        if (typeof Tesseract === 'undefined') {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-            s.onload = resolve;
-            s.onerror = () => reject(new Error("Moteur OCR indisponible"));
-            document.head.appendChild(s);
-          });
-        }
-
+        const worker = await getOrCreateOcrWorker();
         const processedCanvas = await prepareReceiptCanvasForOcr(imageSource);
-        const worker = await Tesseract.createWorker('eng');
         const ret = await worker.recognize(processedCanvas);
-        await worker.terminate();
 
         const rawText = ret && ret.data && ret.data.text ? ret.data.text : '';
         console.log("Texte extrait du ticket (OCR) :", rawText);
@@ -1849,15 +2066,26 @@
       }
 
       const amountInput = document.getElementById('cmd-amount');
-      const amountVal = parseFloat(amountInput.value);
+      const rawVal = String(amountInput.value || '').trim().replace(',', '.');
+      const amountVal = parseFloat(rawVal);
 
       if (!amountVal || amountVal <= 0 || isNaN(amountVal)) {
         showCmdAlert("Veuillez saisir un montant valide supérieur à 0 DH.");
         return;
       }
 
+      if (amountVal > 20000) {
+        showCmdAlert("Le montant d'une commande ne peut pas dépasser 20 000 DH.");
+        return;
+      }
+
       if (!selectedCompressedPhoto) {
         showCmdAlert("La photo du ticket est obligatoire pour enregistrer une commande.");
+        return;
+      }
+
+      if (selectedCompressedPhoto.length > 950000) {
+        showCmdAlert("La photo est trop volumineuse pour être enregistrée. Veuillez reprendre une photo.");
         return;
       }
 
@@ -1990,6 +2218,14 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeTicketModal();
+      }
+    });
+
+    // Libération de la mémoire OCR lors de la fermeture
+    window.addEventListener('beforeunload', () => {
+      if (ocrWorkerInstance) {
+        try { ocrWorkerInstance.terminate(); } catch (e) {}
+        ocrWorkerInstance = null;
       }
     });
   </script>
