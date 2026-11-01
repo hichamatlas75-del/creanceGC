@@ -817,6 +817,12 @@
           Inscription directe : votre nom et un mot de passe suffisent pour ouvrir votre compte prépayé.
         </p>
       </form>
+
+      <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed rgba(58, 51, 41, 0.7);">
+        <a href="caisse.html" style="color: var(--text-muted); font-size: 12px; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-brass)'" onmouseout="this.style.color='var(--text-muted)'">
+          Accès personnel de caisse : <strong style="color: var(--accent-brass);">Espace Caisse →</strong>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -959,7 +965,11 @@
 
     // Helpers
     const usernameToEmail = (username) => {
-      const clean = (username || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      let val = (username || '').trim().toLowerCase();
+      if (val.includes('@')) {
+        val = val.split('@')[0];
+      }
+      const clean = val.replace(/[^a-z0-9._-]/g, '');
       return `${clean}@greycorner.app`;
     };
 
@@ -1028,9 +1038,13 @@
     }
 
     // Gestion de l'affichage des alertes
-    function showAuthAlert(msg) {
+    function showAuthAlert(msg, isHtml = false) {
       const el = document.getElementById('auth-alert');
-      el.textContent = msg;
+      if (isHtml) {
+        el.innerHTML = msg;
+      } else {
+        el.textContent = msg;
+      }
       el.style.display = 'block';
     }
 
@@ -1193,7 +1207,7 @@
         const profile = snap.data();
         if (profile.role === 'caisse') {
           await signOut(auth);
-          showAuthAlert("Compte caisse : utilisez la page caisse.");
+          showAuthAlert('Compte caisse détecté :<br><a href="caisse.html" style="color: #f3ecdc; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 6px;">👉 Cliquez ici pour ouvrir la page Caisse →</a>', true);
           return;
         }
 

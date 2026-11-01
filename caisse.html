@@ -982,6 +982,12 @@
         </div>
         <button type="submit" id="btn-caisse-login" class="btn">Accéder à la caisse</button>
       </form>
+
+      <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed rgba(58, 51, 41, 0.7);">
+        <a href="index.html" style="color: var(--text-muted); font-size: 12px; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-brass)'" onmouseout="this.style.color='var(--text-muted)'">
+          ← Accès client : <strong style="color: var(--accent-brass);">Espace Client</strong>
+        </a>
+      </div>
     </div>
 
     <!-- Écran Accès Caisse Refusé -->
@@ -1163,7 +1169,11 @@
 
     // Helpers
     const usernameToEmail = (username) => {
-      const clean = (username || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      let val = (username || '').trim().toLowerCase();
+      if (val.includes('@')) {
+        val = val.split('@')[0];
+      }
+      const clean = val.replace(/[^a-z0-9._-]/g, '');
       return `${clean}@greycorner.app`;
     };
 
