@@ -2,6 +2,13 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "auth": {
+    "providers": {
+      "emailPassword": {
+        "enabled": true
+      }
+    }
+  },
   "hosting": {
     "public": ".",
     "ignore": [
