@@ -3,14 +3,20 @@ service cloud.firestore {
   match /databases/{db}/documents {
 
     function isCaisse() {
-      return request.auth != null &&
-        get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role == 'caisse';
+      return request.auth != null && (
+        (request.auth.token.email != null && request.auth.token.email.matches('(?i).*caisse@.*')) ||
+        (exists(/databases/$(db)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role == 'caisse')
+      );
     }
 
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isCaisse());
-      allow create: if request.auth != null && request.auth.uid == uid
-                    && request.resource.data.role == 'client';
+      allow create: if request.auth != null && (
+        (request.auth.uid == uid && request.resource.data.role == 'client') ||
+        (request.auth.uid == uid && isCaisse()) ||
+        isCaisse()
+      );
       allow update: if isCaisse();
     }
 

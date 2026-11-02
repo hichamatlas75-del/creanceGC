@@ -1901,6 +1901,14 @@
         if (snap.exists()) {
           const profile = snap.data();
           roleIsCaisse = (profile.role === 'caisse') || isMasterCaisse;
+        } else if (isMasterCaisse) {
+          await setDoc(doc(db, 'users', user.uid), {
+            username: 'caisse',
+            nom: 'Caisse Principale',
+            role: 'caisse',
+            createdAt: Date.now()
+          });
+          roleIsCaisse = true;
         }
       } catch (err) {
         console.warn("Caisse check notice (quota/network):", err);
