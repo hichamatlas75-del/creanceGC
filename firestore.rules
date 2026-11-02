@@ -30,9 +30,18 @@ service cloud.firestore {
           && request.resource.data.hasTicket == true)
       );
 
-      // Seule la caisse peut valider ou rejeter
-      allow update: if isCaisse();
-      allow delete: if isCaisse();
+      // La caisse peut valider, corriger ou rejeter ; le client peut annuler sa commande en attente
+      allow update: if isCaisse() || (
+        request.auth != null
+        && resource.data.clientId == request.auth.uid
+        && resource.data.statut == 'en_attente'
+        && request.resource.data.statut == 'annule'
+      );
+      allow delete: if isCaisse() || (
+        request.auth != null
+        && resource.data.clientId == request.auth.uid
+        && resource.data.statut == 'en_attente'
+      );
     }
 
     match /tickets/{id} {
@@ -44,7 +53,10 @@ service cloud.firestore {
                     && request.resource.data.clientId == request.auth.uid
                     && request.resource.data.img is string
                     && request.resource.data.img.size() < 1000000;
-      allow delete: if isCaisse();
+      allow delete: if isCaisse() || (
+        request.auth != null
+        && resource.data.clientId == request.auth.uid
+      );
     }
   }
 }

@@ -17,6 +17,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GC Caisse">
   <meta name="format-detection" content="telephone=no">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('caisse_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 
   <!-- Icônes Apple Touch & Favicons -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -34,17 +40,64 @@
   <!-- Lecteur OCR Tesseract.js -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
-    :root {
+    :root, [data-theme="light"] {
+      --bg: #f4f6fa;
+      --header-bg: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-input: #ffffff;
+      --border: #e2e8f0;
+      --border-focus: #2563eb;
+      --focus-ring: rgba(37, 99, 235, 0.18);
+      --text-ivory: #0f172a;
+      --text-muted: #64748b;
+      --accent-brass: #2563eb;
+      --accent-brass-hover: #1d4ed8;
+      --accent-brass-bg: rgba(37, 99, 235, 0.08);
+      --accent-brass-border: rgba(37, 99, 235, 0.3);
+      --accent-green: #15803d;
+      --accent-green-bg: rgba(22, 163, 74, 0.08);
+      --accent-green-border: rgba(22, 163, 74, 0.25);
+      --accent-red: #dc2626;
+      --accent-red-bg: rgba(220, 38, 38, 0.08);
+      --accent-red-border: rgba(220, 38, 38, 0.25);
+      --accent-amber: #d97706;
+      --accent-amber-bg: rgba(217, 119, 6, 0.08);
+      --accent-amber-border: rgba(217, 119, 6, 0.3);
+      --accent-amber-text: #b45309;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      --btn-primary-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      --btn-primary-text: #ffffff;
+      --btn-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+      --tab-active-text: #ffffff;
+      --modal-overlay-bg: rgba(15, 23, 42, 0.65);
+      --modal-img-bg: #0f172a;
+      --pill-bg: rgba(37, 99, 235, 0.08);
+      --toolbar-btn-hover: rgba(37, 99, 235, 0.12);
+      --btn-ticket-bg: rgba(37, 99, 235, 0.08);
+      --btn-ticket-hover-bg: rgba(37, 99, 235, 0.16);
+    }
+
+    [data-theme="dark"] {
       --bg: #14120f;
+      --header-bg: linear-gradient(180deg, rgba(31, 27, 22, 0.98) 0%, rgba(20, 18, 15, 0.9) 100%);
       --bg-card: #1f1b16;
       --bg-card-hover: #26211c;
       --bg-input: #181512;
       --border: #3a3329;
       --border-focus: #c3a15b;
+      --focus-ring: rgba(195, 161, 91, 0.18);
       --text-ivory: #f3ecdc;
       --text-muted: #9e9484;
       --accent-brass: #c3a15b;
       --accent-brass-hover: #d8b66f;
+      --accent-brass-bg: rgba(195, 161, 91, 0.12);
+      --accent-brass-border: rgba(195, 161, 91, 0.35);
       --accent-green: #6fae7a;
       --accent-green-bg: rgba(111, 174, 122, 0.12);
       --accent-green-border: rgba(111, 174, 122, 0.35);
@@ -53,12 +106,19 @@
       --accent-red-border: rgba(196, 101, 90, 0.35);
       --accent-amber: #d4a359;
       --accent-amber-bg: rgba(212, 163, 89, 0.15);
-      --font-serif: 'Cormorant Garamond', Georgia, serif;
-      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --radius-lg: 16px;
-      --radius-md: 10px;
-      --radius-sm: 6px;
+      --accent-amber-border: rgba(212, 163, 89, 0.4);
+      --accent-amber-text: #f7d294;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --btn-primary-bg: linear-gradient(135deg, #c3a15b 0%, #aa8945 100%);
+      --btn-primary-text: #14120f;
+      --btn-shadow: 0 4px 15px rgba(195, 161, 91, 0.25);
+      --tab-active-text: #14120f;
+      --modal-overlay-bg: rgba(10, 8, 6, 0.92);
+      --modal-img-bg: rgba(0, 0, 0, 0.5);
+      --pill-bg: rgba(195, 161, 91, 0.08);
+      --toolbar-btn-hover: rgba(195, 161, 91, 0.15);
+      --btn-ticket-bg: rgba(195, 161, 91, 0.1);
+      --btn-ticket-hover-bg: rgba(195, 161, 91, 0.2);
     }
 
     * {
@@ -81,7 +141,7 @@
 
     /* En-tête */
     header {
-      background: linear-gradient(180deg, rgba(31, 27, 22, 0.98) 0%, rgba(20, 18, 15, 0.9) 100%);
+      background: var(--header-bg);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       position: sticky;
@@ -144,6 +204,29 @@
       color: var(--accent-brass);
       font-weight: 600;
       letter-spacing: 0.3px;
+    }
+
+    /* Bouton Bascule Thème Clair / Sombre */
+    .btn-theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-ivory);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-theme-toggle:hover {
+      border-color: var(--accent-brass);
+      color: var(--accent-brass);
+      transform: translateY(-1px);
     }
 
     .btn-quit {
@@ -325,7 +408,7 @@
 
     .tab-btn.active {
       background: var(--accent-brass);
-      color: #14120f;
+      color: var(--tab-active-text);
     }
 
     .tab-badge {
@@ -338,13 +421,13 @@
       border-radius: 10px;
       font-size: 11px;
       font-weight: 700;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.15);
       color: inherit;
     }
 
     .tab-btn.active .tab-badge {
-      background: rgba(20, 18, 15, 0.25);
-      color: #14120f;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--tab-active-text);
     }
 
     .tab-btn:not(.active) .tab-badge.highlight {
@@ -404,7 +487,7 @@
     }
 
     .item-card {
-      background: rgba(24, 21, 18, 0.7);
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 16px;
@@ -416,8 +499,9 @@
     }
 
     .item-card:hover {
-      border-color: rgba(195, 161, 91, 0.35);
-      background: rgba(24, 21, 18, 0.95);
+      border-color: var(--accent-brass);
+      background: var(--bg-card-hover);
+      box-shadow: var(--shadow);
     }
 
     @media (max-width: 600px) {
@@ -509,13 +593,13 @@
     }
 
     .btn-ticket {
-      background: rgba(195, 161, 91, 0.1);
+      background: var(--btn-ticket-bg);
       color: var(--accent-brass);
       border-color: var(--border);
     }
 
     .btn-ticket:hover:not(:disabled) {
-      background: rgba(195, 161, 91, 0.2);
+      background: var(--btn-ticket-hover-bg);
       border-color: var(--accent-brass);
     }
 
@@ -641,7 +725,7 @@
 
     input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(195, 161, 91, 0.15);
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
 
     .btn {
@@ -651,8 +735,8 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      background: linear-gradient(135deg, var(--accent-brass) 0%, #aa8945 100%);
-      color: #14120f;
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
       border: none;
       border-radius: var(--radius-md);
       font-family: var(--font-sans);
@@ -660,7 +744,7 @@
       font-weight: 600;
       letter-spacing: 0.5px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(195, 161, 91, 0.25);
+      box-shadow: var(--btn-shadow);
       transition: all 0.2s;
     }
 
@@ -717,7 +801,7 @@
     }
 
     .denied-code {
-      background: #000;
+      background: var(--bg-input);
       padding: 10px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
@@ -733,7 +817,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10, 8, 6, 0.92);
+      background: var(--modal-overlay-bg);
       backdrop-filter: blur(8px);
       z-index: 1000;
       display: none;
@@ -812,8 +896,8 @@
 
     .warning-box {
       background: var(--accent-amber-bg);
-      border: 1px solid rgba(212, 163, 89, 0.4);
-      color: #f7d294;
+      border: 1px solid var(--accent-amber-border);
+      color: var(--accent-amber-text);
       padding: 12px;
       border-radius: var(--radius-sm);
       font-size: 13px;
@@ -884,7 +968,7 @@
     }
 
     .toolbar-btn:hover {
-      background: rgba(195, 161, 91, 0.15);
+      background: var(--toolbar-btn-hover);
       color: var(--accent-brass);
     }
 
@@ -906,7 +990,7 @@
       justify-content: center;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.5);
+      background: var(--modal-img-bg);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
       touch-action: pan-x pan-y;
     }
@@ -959,27 +1043,182 @@
     }
 
     .caisse-ocr-banner.scanning {
-      background: rgba(195, 161, 91, 0.12);
-      border: 1px solid rgba(195, 161, 91, 0.35);
+      background: var(--accent-brass-bg);
+      border: 1px solid var(--accent-brass-border);
       color: var(--accent-brass);
     }
 
     .caisse-ocr-banner.match {
       background: var(--accent-green-bg);
-      border: 1px solid rgba(111, 174, 122, 0.5);
-      color: #9cd1a4;
+      border: 1px solid var(--accent-green-border);
+      color: var(--accent-green);
     }
 
     .caisse-ocr-banner.mismatch {
-      background: rgba(196, 101, 90, 0.15);
-      border: 1px solid rgba(196, 101, 90, 0.5);
-      color: #e59086;
+      background: var(--accent-red-bg);
+      border: 1px solid var(--accent-red-border);
+      color: var(--accent-red);
     }
 
     .caisse-ocr-banner.info {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-input);
       border: 1px solid var(--border);
       color: var(--text-muted);
+    }
+
+    /* Barre d'action basse et modifications dans la modale ticket */
+    .modal-ticket-bottombar {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+    }
+
+    .modal-ticket-client-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .modal-ticket-client-summary .client-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-ivory);
+    }
+
+    .modal-ticket-client-summary .client-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .modal-ticket-amount-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .modal-ticket-amount-group label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .modal-amount-input {
+      width: 90px;
+      background: transparent !important;
+      border: 1px solid var(--border) !important;
+      padding: 4px 6px !important;
+      color: var(--accent-brass) !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+      border-radius: 4px !important;
+    }
+
+    .modal-ticket-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--accent-brass);
+      color: var(--accent-brass);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent-brass);
+      color: #14120f;
+    }
+
+    .form-select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--text-ivory);
+      font-family: var(--font-sans);
+      outline: none;
+    }
+
+    .form-select:focus {
+      border-color: var(--accent-brass);
+    }
+
+    /* Informations de solde et alerte dépassement dans les commandes en attente */
+    .pending-balance-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pending-balance-info .arrow {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .badge-alert-pill {
+      background: rgba(196, 101, 90, 0.2);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red-border);
+      border-radius: 12px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .text-danger {
+      color: var(--accent-red) !important;
+    }
+
+    .text-success {
+      color: var(--accent-green) !important;
+    }
+
+    /* Animation pulsation badge Caisse */
+    .tab-badge.highlight {
+      background: var(--accent-amber);
+      color: #14120f;
+      animation: badgePulse 1.8s infinite;
+    }
+
+    @keyframes badgePulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 163, 89, 0.6); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(212, 163, 89, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 163, 89, 0); }
     }
 
     .hidden {
@@ -1015,6 +1254,14 @@
           </svg>
           <span id="caisse-ocr-label">Lire Total (OCR)</span>
         </button>
+        <button type="button" class="toolbar-btn" onclick="downloadCurrentTicketImage()" title="Télécharger photo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Télécharger</span>
+        </button>
         <button type="button" class="toolbar-btn toolbar-close" onclick="closeTicketModal()" title="Fermer (Échap)">✕</button>
       </div>
 
@@ -1027,6 +1274,68 @@
         </div>
         <img id="modal-ticket-img" class="modal-ticket-img hidden" alt="Ticket" />
       </div>
+
+      <!-- Barre d'action directe en caisse -->
+      <div id="modal-ticket-bottombar" class="modal-ticket-bottombar">
+        <div class="modal-ticket-client-summary">
+          <div class="client-name" id="modal-ticket-client-name">Client</div>
+          <div class="client-sub" id="modal-ticket-balance-summary">Solde : 0,00 DH</div>
+        </div>
+        <div class="modal-ticket-amount-group" id="modal-ticket-edit-group">
+          <label for="modal-ticket-amount-input">Montant :</label>
+          <input type="number" step="0.01" min="0.01" id="modal-ticket-amount-input" class="modal-amount-input">
+          <button type="button" class="btn-sm btn-outline" onclick="updateTicketAmountFromModal()" title="Ajuster le montant si l'OCR ou le client s'est trompé">Ajuster</button>
+        </div>
+        <div class="modal-ticket-buttons" id="modal-ticket-action-buttons">
+          <button type="button" class="btn-action btn-valider" id="btn-modal-valider" onclick="validerCurrentTicketFromModal()" title="Valider la commande (Raccourci V)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Valider (V)
+          </button>
+          <button type="button" class="btn-action btn-rejeter" id="btn-modal-rejeter" onclick="openRejectModalForCurrentTicket()" title="Rejeter avec motif (Raccourci R)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Rejeter (R)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MOTIF DE REJET -->
+  <div id="reject-modal" class="modal-overlay" style="display: none;" onclick="closeRejectModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" style="color: var(--accent-red);">✕ Rejeter la commande</div>
+        <button class="modal-close" onclick="closeRejectModal()">✕</button>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+        Client : <strong id="reject-modal-client-name" style="color: var(--text-ivory);">-</strong>
+        <br>Montant déclaré : <strong id="reject-modal-amount" style="color: var(--accent-brass);">-</strong>
+      </div>
+
+      <form id="reject-form" onsubmit="confirmRejectCommande(event)">
+        <div class="form-group">
+          <label for="reject-reason-select">Motif du rejet (visible par le client)</label>
+          <select id="reject-reason-select" class="form-select" onchange="handleRejectReasonChange()">
+            <option value="Photo floue ou illisible">Photo floue ou illisible</option>
+            <option value="Montant déclaré non conforme au ticket">Montant déclaré non conforme au ticket</option>
+            <option value="Ticket incomplet / total coupé">Ticket incomplet / total coupé</option>
+            <option value="Ticket déjà validé auparavant">Ticket déjà validé auparavant</option>
+            <option value="Ticket d'un autre établissement">Ticket d'un autre établissement</option>
+            <option value="autre">Autre motif personnalisé...</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="reject-custom-group" style="display: none;">
+          <label for="reject-custom-note">Précisez le motif exact</label>
+          <input type="text" id="reject-custom-note" placeholder="ex. Merci de reprendre la photo du total">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeRejectModal()">Annuler</button>
+          <button type="submit" id="btn-confirm-reject" class="btn btn-rejeter" style="background: var(--accent-red); color: #fff;">Confirmer le rejet</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1114,8 +1423,48 @@
     </div>
   </div>
 
+  <!-- MODAL CRÉATION NOUVEAU CLIENT PAR LA CAISSE -->
+  <div id="new-client-modal" class="modal-overlay" style="display: none;" onclick="closeNewClientModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">+ Nouveau Client</div>
+        <button class="modal-close" onclick="closeNewClientModal()">✕</button>
+      </div>
+
+      <div id="new-client-alert" class="alert alert-error" style="display: none;"></div>
+
+      <form id="new-client-form" onsubmit="submitNewClient(event)">
+        <div class="form-group">
+          <label for="new-client-username">Nom du client ou pseudo</label>
+          <input type="text" id="new-client-username" placeholder="ex. Mehdi" required autocomplete="off" autocapitalize="none">
+        </div>
+
+        <div class="form-group">
+          <label for="new-client-password">Mot de passe temporaire (min. 6 car.)</label>
+          <input type="password" id="new-client-password" placeholder="6 caractères minimum" minlength="6" value="123456" required>
+        </div>
+
+        <div class="form-group">
+          <label for="new-client-initial-depot">Premier versement d'espèces (DH - Optionnel)</label>
+          <input type="number" id="new-client-initial-depot" step="0.01" min="0" placeholder="0.00">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeNewClientModal()">Annuler</button>
+          <button type="submit" id="btn-create-client-submit" class="btn btn-depot">Créer le compte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ÉCRAN CONNEXION CAISSE -->
   <div id="auth-screen" class="auth-wrapper">
+    <div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 12px;">
+      <button type="button" class="btn-theme-toggle" onclick="toggleCaisseTheme()" title="Basculer le thème Clair / Sombre" aria-label="Basculer le thème">
+        <span class="theme-toggle-icon">🌙</span>
+        <span class="btn-label theme-toggle-label">Sombre</span>
+      </button>
+    </div>
     <div class="auth-brand-logo">
       <img src="assets/logo.png" alt="Grey Corner Café" style="width: 84px; height: 84px; object-fit: contain; border-radius: 16px; background: #ffffff; padding: 6px; margin: 0 auto 12px; display: block; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);" />
       <div class="auth-brand-title">Grey Corner</div>
@@ -1175,6 +1524,10 @@
           </div>
         </div>
         <div class="header-actions">
+          <button type="button" class="btn-theme-toggle" onclick="toggleCaisseTheme()" title="Basculer le thème Clair / Sombre" aria-label="Basculer le thème">
+            <span class="theme-toggle-icon">🌙</span>
+            <span class="btn-label theme-toggle-label">Sombre</span>
+          </button>
           <div class="user-pill">
             <span class="user-name">Caisse</span>
           </div>
@@ -1242,12 +1595,18 @@
       <!-- ONGLET 2 : CLIENTS -->
       <section id="pane-clients" class="tab-pane">
         <div class="card">
-          <div class="search-box">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="client-search" class="search-input" placeholder="Rechercher un client par son nom..." autocomplete="off" oninput="handleClientSearch(event)">
+          <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div class="search-box" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="client-search" class="search-input" placeholder="Rechercher un client par son nom..." autocomplete="off" oninput="handleClientSearch(event)">
+            </div>
+            <button type="button" class="btn-action btn-depot" style="height: 44px; padding: 0 16px;" onclick="openNewClientModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>+ Nouveau client</span>
+            </button>
           </div>
 
           <div id="clients-list" class="items-list">
@@ -1292,13 +1651,16 @@
       getAuth,
       signInWithEmailAndPassword,
       signOut,
-      onAuthStateChanged
+      onAuthStateChanged,
+      createUserWithEmailAndPassword
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore,
       doc,
       getDoc,
+      setDoc,
       updateDoc,
+      deleteDoc,
       collection,
       query,
       where,
@@ -1323,6 +1685,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // App secondaire pour la création de client sans déconnecter la caisse
+    let secondaryApp = null;
+    let secondaryAuth = null;
+    try {
+      secondaryApp = initializeApp(firebaseConfig, 'SecondaryCaisse');
+      secondaryAuth = getAuth(secondaryApp);
+    } catch (secErr) {
+      console.warn("Secondary app init notice:", secErr);
+    }
+
     // État global
     let currentCaisseUser = null;
     let unsubTransactions = null;
@@ -1331,10 +1703,52 @@
     let usersMap = new Map(); // uid -> { nom, username, ... }
     let usersList = [];
     let transactionsList = [];
+    let clientBalancesCache = new Map();
     let currentSearchTerm = '';
 
     let activeModalClientId = null;
     let activeModalClientBalance = 0;
+
+    // Carillon audio Web Audio API (synthétiseur de cloche agréable et discret)
+    let audioCtx = null;
+    let lastPendingCount = null;
+
+    function playChimeSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+        // Note 1 (Mi5 - 659.25 Hz)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now);
+        gain1.gain.setValueAtTime(0.22, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.35);
+
+        // Note 2 (Si5 - 987.77 Hz)
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(987.77, now + 0.12);
+        gain2.gain.setValueAtTime(0.28, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.6);
+      } catch (e) {
+        console.warn("Chime notice:", e);
+      }
+    }
 
     // Helpers
     const usernameToEmail = (username) => {
@@ -1342,6 +1756,7 @@
       if (val.includes('@')) {
         val = val.split('@')[0];
       }
+      val = val.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const clean = val.replace(/[^a-z0-9._-]/g, '');
       return `${clean}@greycorner.app`;
     };
@@ -1443,8 +1858,13 @@
       }
     };
 
-    // Retour au formulaire après écran refusé
-    window.resetToLogin = () => {
+    // Retour au formulaire après écran refusé (avec déconnexion réelle du compte non-caisse)
+    window.resetToLogin = async () => {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.warn("SignOut notice:", e);
+      }
       document.getElementById('denied-box').classList.add('hidden');
       document.getElementById('login-box').classList.remove('hidden');
       document.getElementById('btn-caisse-login').disabled = false;
@@ -1465,6 +1885,7 @@
       usersMap.clear();
       usersList = [];
       transactionsList = [];
+      clientBalancesCache.clear();
       await signOut(auth);
     };
 
@@ -1487,7 +1908,6 @@
 
       if (roleIsCaisse) {
         currentCaisseUser = user;
-        // Afficher dashboard caisse
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
         initRealtimeListeners();
@@ -1496,7 +1916,6 @@
         document.getElementById('login-box').classList.add('hidden');
         document.getElementById('denied-uid-text').textContent = deniedUid;
         document.getElementById('denied-box').classList.remove('hidden');
-        // Ne pas exécuter signOut automatiquement pour laisser le message d'accès restreint visible
       }
     }
 
@@ -1576,6 +1995,7 @@
       clientBalancesCents.forEach((cents, clientId) => {
         clientBalances.set(clientId, cents / 100);
       });
+      clientBalancesCache = clientBalances;
 
       const totalDepots = totalDepotsCents / 100;
       const totalConsomme = totalConsommeCents / 100;
@@ -1589,7 +2009,14 @@
       // 2. Rendu Onglet 1 : À valider
       const pendingOrders = transactionsList.filter((t) => t.statut === 'en_attente' && t.type === 'commande');
       pendingOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      renderPendingTab(pendingOrders);
+
+      // Carillon d'alerte lors de la réception d'une nouvelle commande
+      if (lastPendingCount !== null && pendingOrders.length > lastPendingCount) {
+        playChimeSound();
+      }
+      lastPendingCount = pendingOrders.length;
+
+      renderPendingTab(pendingOrders, clientBalances);
 
       // 3. Rendu Onglet 2 : Clients
       renderClientsTab(clientBalances);
@@ -1601,8 +2028,8 @@
       renderJournalTab(journal200);
     }
 
-    // Rendu onglet À valider
-    function renderPendingTab(pendingList) {
+    // Rendu onglet À valider avec informations de solde et détection de découvert
+    function renderPendingTab(pendingList, clientBalances) {
       const container = document.getElementById('pending-list');
       const badgeCount = document.getElementById('badge-pending-count');
       const subTitle = document.getElementById('pending-subtitle');
@@ -1628,9 +2055,12 @@
       pendingList.forEach((t) => {
         const clientObj = usersMap.get(t.clientId);
         const clientName = clientObj ? (clientObj.nom || clientObj.username) : `Client (${t.clientId.slice(0, 6)}...)`;
+        const currentBal = clientBalances ? (clientBalances.get(t.clientId) || 0) : 0;
+        const remaining = currentBal - (Number(t.montant) || 0);
+        const isOverrun = remaining < 0;
 
         const ticketBtnHtml = t.hasTicket ? `
-          <button type="button" class="btn-action btn-ticket" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">
+          <button type="button" class="btn-action btn-ticket" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0}, '${escapeHtml(t.clientId)}', '${escapeHtml(clientName)}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -1647,18 +2077,24 @@
               <div class="item-sub">
                 <span>${escapeHtml(formatDate(t.createdAt))}</span>
                 <span>•</span>
-                <strong style="color: var(--accent-brass); font-size: 15px; font-family: var(--font-serif);">${escapeHtml(formatDH(t.montant))}</strong>
+                <strong style="color: var(--accent-brass); font-size: 16px; font-family: var(--font-serif);">${escapeHtml(formatDH(t.montant))}</strong>
+              </div>
+              <div class="pending-balance-info">
+                <span>Solde : <strong style="color: ${currentBal > 0 ? 'var(--accent-green)' : (currentBal < 0 ? 'var(--accent-red)' : 'var(--text-ivory)')};">${escapeHtml(formatDH(currentBal))}</strong></span>
+                <span class="arrow">→</span>
+                <span>Après débit : <strong class="${isOverrun ? 'text-danger' : 'text-success'}">${escapeHtml(formatDH(remaining))}</strong></span>
+                ${isOverrun ? '<span class="badge-alert-pill">Découvert</span>' : ''}
               </div>
             </div>
             <div class="item-actions">
               ${ticketBtnHtml}
-              <button type="button" class="btn-action btn-valider" onclick="validerCommande('${escapeHtml(t.id)}', this)">
+              <button type="button" class="btn-action btn-valider" onclick="validerCommande('${escapeHtml(t.id)}', this)" title="Valider">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 Valider
               </button>
-              <button type="button" class="btn-action btn-rejeter" onclick="rejeterCommande('${escapeHtml(t.id)}', this)">
+              <button type="button" class="btn-action btn-rejeter" onclick="openRejectModal('${escapeHtml(t.id)}', '${escapeHtml(clientName)}', ${Number(t.montant) || 0})" title="Rejeter avec motif">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1681,8 +2117,12 @@
       }
       try {
         await updateDoc(doc(db, 'transactions', id), {
-          statut: 'valide'
+          statut: 'valide',
+          validatedAt: Date.now()
         });
+        if (currentTicketTransId === id) {
+          closeTicketModal();
+        }
       } catch (err) {
         console.error("Valider commande error:", err);
         alert("Erreur lors de la validation : " + err.message);
@@ -1693,33 +2133,73 @@
       }
     };
 
-    // Rejet d'une commande avec protection anti-double-clic
-    window.rejeterCommande = async (id, btn) => {
-      if (!confirm("Voulez-vous rejeter ce ticket ? Le montant ne sera pas débité.")) {
-        return;
+    // Rejet d'une commande avec sélection du motif
+    let pendingRejectTransId = null;
+
+    window.openRejectModal = (id, clientName, amount) => {
+      pendingRejectTransId = id;
+      document.getElementById('reject-modal-client-name').textContent = clientName || 'Client';
+      document.getElementById('reject-modal-amount').textContent = formatDH(amount);
+      document.getElementById('reject-reason-select').value = "Photo floue ou illisible";
+      document.getElementById('reject-custom-group').style.display = 'none';
+      document.getElementById('reject-custom-note').value = '';
+      document.getElementById('reject-modal').style.display = 'flex';
+    };
+
+    window.closeRejectModal = () => {
+      document.getElementById('reject-modal').style.display = 'none';
+      pendingRejectTransId = null;
+    };
+
+    window.handleRejectReasonChange = () => {
+      const sel = document.getElementById('reject-reason-select');
+      const customGroup = document.getElementById('reject-custom-group');
+      if (sel.value === 'autre') {
+        customGroup.style.display = 'block';
+        document.getElementById('reject-custom-note').focus();
+      } else {
+        customGroup.style.display = 'none';
       }
-      if (btn) {
-        btn.disabled = true;
-        btn.style.opacity = '0.6';
+    };
+
+    window.confirmRejectCommande = async (e) => {
+      e.preventDefault();
+      if (!pendingRejectTransId) return;
+
+      const sel = document.getElementById('reject-reason-select');
+      let reason = sel.value;
+      if (reason === 'autre') {
+        const custom = (document.getElementById('reject-custom-note').value || '').trim();
+        reason = custom || 'Autre motif';
       }
+
+      const btn = document.getElementById('btn-confirm-reject');
+      btn.disabled = true;
+      btn.textContent = "Rejet en cours...";
+
       try {
-        await updateDoc(doc(db, 'transactions', id), {
-          statut: 'rejete'
+        await updateDoc(doc(db, 'transactions', pendingRejectTransId), {
+          statut: 'rejete',
+          motifRejet: reason,
+          rejectedAt: Date.now()
         });
-      } catch (err) {
-        console.error("Rejeter commande error:", err);
-        alert("Erreur lors du rejet : " + err.message);
-        if (btn) {
-          btn.disabled = false;
-          btn.style.opacity = '1';
+
+        if (currentTicketTransId === pendingRejectTransId) {
+          closeTicketModal();
         }
+        closeRejectModal();
+      } catch (err) {
+        console.error("Erreur rejet:", err);
+        alert("Erreur lors du rejet : " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirmer le rejet";
       }
     };
 
     // Recherche de clients sans perte de focus
     window.handleClientSearch = (e) => {
       currentSearchTerm = (e.target.value || '').trim().toLowerCase();
-      // On met à jour uniquement la liste des clients sans toucher à l'input
       recomputeAndRender();
     };
 
@@ -1790,6 +2270,94 @@
       container.innerHTML = html;
     }
 
+    // Modal Création Client par la Caisse
+    window.openNewClientModal = () => {
+      const alertEl = document.getElementById('new-client-alert');
+      if (alertEl) { alertEl.style.display = 'none'; alertEl.textContent = ''; }
+      document.getElementById('new-client-username').value = '';
+      document.getElementById('new-client-password').value = '123456';
+      document.getElementById('new-client-initial-depot').value = '';
+      document.getElementById('new-client-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('new-client-username').focus(), 100);
+    };
+
+    window.closeNewClientModal = () => {
+      document.getElementById('new-client-modal').style.display = 'none';
+    };
+
+    window.submitNewClient = async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('new-client-alert');
+      alertEl.style.display = 'none';
+
+      const usernameInput = (document.getElementById('new-client-username').value || '').trim();
+      const password = document.getElementById('new-client-password').value;
+      const initialDepot = parseFloat(String(document.getElementById('new-client-initial-depot').value || '0').replace(',', '.')) || 0;
+      const submitBtn = document.getElementById('btn-create-client-submit');
+
+      const cleanUser = usernameInput.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9._-]/gi, '');
+      if (cleanUser.length < 3) {
+        alertEl.textContent = "Le nom doit comporter au moins 3 caractères.";
+        alertEl.style.display = 'block';
+        return;
+      }
+      if (password.length < 6) {
+        alertEl.textContent = "Le mot de passe doit comporter au moins 6 caractères.";
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Création du compte...";
+
+      try {
+        const email = usernameToEmail(usernameInput);
+        if (!secondaryAuth) {
+          throw new Error("Module secondaire d'authentification indisponible");
+        }
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const uid = userCredential.user.uid;
+
+        // Déconnexion de la session secondaire
+        await signOut(secondaryAuth);
+
+        // Création du profil client dans Firestore via la session caisse
+        await setDoc(doc(db, 'users', uid), {
+          username: usernameInput,
+          nom: usernameInput,
+          role: 'client',
+          createdAt: Date.now(),
+          createdByCaisse: true
+        });
+
+        // Enregistrement du premier dépôt si spécifié
+        if (initialDepot > 0) {
+          await addDoc(collection(db, 'transactions'), {
+            clientId: uid,
+            type: 'depot',
+            montant: initialDepot,
+            statut: 'valide',
+            hasTicket: false,
+            createdAt: Date.now(),
+            by: auth.currentUser ? auth.currentUser.uid : 'caisse',
+            note: 'Premier dépôt à l\'ouverture du compte'
+          });
+        }
+
+        closeNewClientModal();
+        alert(`Compte créé pour "${usernameInput}" avec succès !${initialDepot > 0 ? ` Premier dépôt de ${formatDH(initialDepot)} enregistré.` : ''}`);
+      } catch (err) {
+        console.error("Erreur création client caisse:", err);
+        alertEl.textContent = err.code === 'auth/email-already-in-use'
+          ? "Ce nom d'utilisateur est déjà utilisé."
+          : "Erreur de création : " + (err.message || "Veuillez réessayer.");
+        alertEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Créer le compte";
+      }
+    };
+
     // Rendu onglet Journal
     function renderJournalTab(journalItems) {
       const container = document.getElementById('journal-list');
@@ -1824,7 +2392,7 @@
           : '<span class="badge badge-attente">En attente</span>';
 
         const ticketBtn = t.hasTicket ? `
-          <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">
+          <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0}, '${escapeHtml(t.clientId)}', '${escapeHtml(clientName)}')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -1960,7 +2528,6 @@
         return;
       }
 
-      // Si le montant dépasse le solde du client, confirmation obligatoire
       if (amountVal > activeModalClientBalance) {
         const confirmMsg = `Attention : ce montant (${formatDH(amountVal)}) dépasse le solde du client (${formatDH(activeModalClientBalance)}).\n\nConfirmer quand même ?`;
         if (!confirm(confirmMsg)) {
@@ -1993,7 +2560,7 @@
       }
     };
 
-    // Exportation du journal en fichier CSV (UTF-8 avec BOM pour compatibilité Excel)
+    // Exportation du journal en fichier CSV
     window.exportJournalCSV = () => {
       const validHistory = transactionsList.filter((t) => t.statut !== 'rejete');
       if (validHistory.length === 0) {
@@ -2034,7 +2601,6 @@
       document.getElementById('history-modal-client-balance').textContent = formatDH(currentBalance);
       const listContainer = document.getElementById('history-modal-list');
 
-      // Filtrer toutes les transactions de ce client
       const clientTransactions = transactionsList.filter(t => t.clientId === clientId);
       clientTransactions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
@@ -2059,12 +2625,13 @@
                   ${statusBadge}
                 </div>
                 <div class="item-sub">${escapeHtml(formatDate(t.createdAt))}</div>
+                ${t.motifRejet ? `<div style="font-size: 11px; color: var(--accent-red); margin-top: 3px;">Motif : ${escapeHtml(t.motifRejet)}</div>` : ''}
               </div>
               <div class="item-actions">
                 <strong style="color: ${amountColor}; font-family: var(--font-serif); font-size: 15px;">
                   ${sign}${escapeHtml(formatDH(t.montant))}
                 </strong>
-                ${t.hasTicket ? `<button type="button" class="btn-action btn-ticket" style="padding: 3px 6px; font-size: 10px;" onclick="closeClientHistoryModal(); openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0})">Ticket</button>` : ''}
+                ${t.hasTicket ? `<button type="button" class="btn-action btn-ticket" style="padding: 3px 6px; font-size: 10px;" onclick="closeClientHistoryModal(); openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0}, '${escapeHtml(t.clientId)}', '${escapeHtml(clientName)}')">Ticket</button>` : ''}
               </div>
             </div>
           `;
@@ -2080,11 +2647,13 @@
       if (modal) modal.style.display = 'none';
     };
 
-    // Modal Visualisation Ticket avec rotation, zoom et lecteur OCR
+    // Modal Visualisation Ticket avec rotation, zoom, actions directes et lecteur OCR
     let currentTicketRotation = 0;
     let isTicketZoomed = false;
     let currentTicketTransId = null;
     let currentExpectedAmount = 0;
+    let currentTicketClientId = null;
+    let currentTicketClientName = '';
     let currentTicketDataUrl = null;
 
     window.rotateTicket = () => {
@@ -2151,41 +2720,46 @@
       });
     }
 
-    // Extraction robuste du montant Total TTC (harmonisée)
+    // Extraction robuste du montant Total TTC (support montants entiers et décimaux)
     function parseTotalFromReceiptText(text) {
       if (!text) return null;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-      // Priorité 1 : Lignes explicites ciblant "TOTAL TTC", "NET A PAYER", etc.
-      const priorityPats = [
-        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})(?:\s*dh|\s*mad)?/i,
-        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i
+      const cleanNumber = (str) => {
+        if (!str) return null;
+        let s = str.replace(/\s+/g, '').replace(/,/g, '.');
+        s = s.replace(/([0-9])o([0-9])/gi, '$10$2');
+        const n = parseFloat(s);
+        return (!isNaN(n) && n > 0 && n < 50000) ? n : null;
+      };
+
+      const priorityPatterns = [
+        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
+        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i
       ];
 
       for (const line of lines) {
         if (/sous[- ]*total|total\s*ht|base\s*ht|tva|remise/i.test(line) && !/total\s*ttc/i.test(line)) {
           continue;
         }
-        for (const regex of priorityPats) {
+        for (const regex of priorityPatterns) {
           const match = line.match(regex);
           if (match && match[1]) {
-            const clean = match[1].replace(/\s/g, '').replace(',', '.');
-            const num = parseFloat(clean);
-            if (!isNaN(num) && num > 0 && num < 100000) {
-              return num;
-            }
+            const val = cleanNumber(match[1]);
+            if (val !== null) return val;
           }
         }
       }
 
-      const fullText = text.replace(/\r/g, ' ');
-      const totalMatches = [...fullText.matchAll(/(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/gi)];
-      if (totalMatches.length > 0) {
-        const lastMatch = totalMatches[totalMatches.length - 1];
+      const fullText = text.replace(/[\r\n]+/g, ' ');
+      const globalRegex = /(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi;
+      const matches = [...fullText.matchAll(globalRegex)];
+      if (matches.length > 0) {
+        const lastMatch = matches[matches.length - 1];
         if (lastMatch && lastMatch[1]) {
-          const num = parseFloat(lastMatch[1].replace(/\s/g, '').replace(',', '.'));
-          if (!isNaN(num) && num > 0) return num;
+          const val = cleanNumber(lastMatch[1]);
+          if (val !== null) return val;
         }
       }
 
@@ -2193,11 +2767,11 @@
       const bottomLines = lines.slice(Math.max(0, lines.length - 10));
       for (const line of bottomLines) {
         if (/tel|wifi|ice|rc|patente|if|date|heure|table|serveur|couvert/i.test(line)) continue;
-        const matches = line.matchAll(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/g);
-        for (const m of matches) {
-          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
-          if (!isNaN(num) && num > 0 && num < 50000) {
-            candidateNumbers.push(num);
+        const numMatches = line.matchAll(/([0-9]{1,5}(?:[.,][0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi);
+        for (const m of numMatches) {
+          const val = cleanNumber(m[1]);
+          if (val !== null && val >= 3) {
+            candidateNumbers.push(val);
           }
         }
       }
@@ -2263,7 +2837,9 @@
             banner.innerHTML = `<span>✓</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong> — Correspond exactement au montant déclaré (${formatDH(currentExpectedAmount)}).</span>`;
           } else if (currentExpectedAmount > 0) {
             banner.className = "caisse-ocr-banner mismatch";
-            banner.innerHTML = `<span>⚠️</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong> — Attention : montant déclaré par le client = ${formatDH(currentExpectedAmount)}.</span>`;
+            banner.innerHTML = `<span>⚠️</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong> — Attention : montant déclaré par le client = ${formatDH(currentExpectedAmount)}. Vous pouvez cliquer sur "Ajuster" ci-dessous.</span>`;
+            const amountInput = document.getElementById('modal-ticket-amount-input');
+            if (amountInput) amountInput.value = detectedTotal.toFixed(2);
           } else {
             banner.className = "caisse-ocr-banner match";
             banner.innerHTML = `<span>✓</span> <span><strong>Total ticket : ${formatDH(detectedTotal)}</strong></span>`;
@@ -2281,7 +2857,7 @@
       }
     };
 
-    window.openTicketModal = async (transId, expectedAmount = 0) => {
+    window.openTicketModal = async (transId, expectedAmount = 0, clientId = '', clientName = '') => {
       const modal = document.getElementById('ticket-modal');
       const loader = document.getElementById('ticket-loader');
       const img = document.getElementById('modal-ticket-img');
@@ -2290,7 +2866,10 @@
 
       currentTicketTransId = transId;
       currentExpectedAmount = Number(expectedAmount) || 0;
+      currentTicketClientId = clientId;
+      currentTicketClientName = clientName;
       currentTicketDataUrl = null;
+
       if (ocrBanner) ocrBanner.classList.add('hidden');
       if (ocrLabel) ocrLabel.textContent = "Lire Total (OCR)";
 
@@ -2299,6 +2878,34 @@
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = 'Zoom';
       img.style.transform = 'none';
+
+      // Récupération de la transaction et des informations de solde
+      const transObj = transactionsList.find(t => t.id === transId);
+      const isPending = transObj ? (transObj.statut === 'en_attente') : true;
+      const actualClientId = clientId || (transObj ? transObj.clientId : '');
+      const clientObj = usersMap.get(actualClientId);
+      const actualName = clientName || (clientObj ? (clientObj.nom || clientObj.username) : 'Client');
+      currentTicketClientId = actualClientId;
+      currentTicketClientName = actualName;
+
+      const clientBal = clientBalancesCache ? (clientBalancesCache.get(actualClientId) || 0) : 0;
+      const amountVal = transObj ? (Number(transObj.montant) || currentExpectedAmount) : currentExpectedAmount;
+      currentExpectedAmount = amountVal;
+
+      document.getElementById('modal-ticket-client-name').textContent = actualName;
+      const rem = clientBal - amountVal;
+      document.getElementById('modal-ticket-balance-summary').innerHTML = `
+        Solde : <strong>${formatDH(clientBal)}</strong> → Après validation : <strong class="${rem < 0 ? 'text-danger' : 'text-success'}">${formatDH(rem)}</strong>
+        ${rem < 0 ? '<span class="badge-alert-pill" style="margin-left: 5px;">Découvert</span>' : ''}
+      `;
+
+      const amountInput = document.getElementById('modal-ticket-amount-input');
+      if (amountInput) amountInput.value = amountVal.toFixed(2);
+
+      const actionButtons = document.getElementById('modal-ticket-action-buttons');
+      const editGroup = document.getElementById('modal-ticket-edit-group');
+      if (actionButtons) actionButtons.style.display = isPending ? 'flex' : 'none';
+      if (editGroup) editGroup.style.display = isPending ? 'flex' : 'none';
 
       modal.style.display = 'flex';
       loader.style.display = 'flex';
@@ -2331,19 +2938,95 @@
       currentTicketRotation = 0;
       isTicketZoomed = false;
       currentTicketDataUrl = null;
+      currentTicketTransId = null;
       const ocrBanner = document.getElementById('caisse-ocr-result');
       if (ocrBanner) ocrBanner.classList.add('hidden');
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = 'Zoom';
     };
 
-    // Fermeture avec Échap
+    window.validerCurrentTicketFromModal = async () => {
+      if (!currentTicketTransId) return;
+      const btn = document.getElementById('btn-modal-valider');
+      await validerCommande(currentTicketTransId, btn);
+      closeTicketModal();
+    };
+
+    window.openRejectModalForCurrentTicket = () => {
+      if (!currentTicketTransId) return;
+      openRejectModal(currentTicketTransId, currentTicketClientName, currentExpectedAmount);
+    };
+
+    window.updateTicketAmountFromModal = async () => {
+      if (!currentTicketTransId) return;
+      const input = document.getElementById('modal-ticket-amount-input');
+      const val = parseFloat(String(input.value || '').replace(',', '.'));
+      if (!val || val <= 0 || isNaN(val)) {
+        alert("Veuillez saisir un montant valide supérieur à 0 DH.");
+        return;
+      }
+      if (val > 20000) {
+        alert("Le montant ne peut pas dépasser 20 000 DH.");
+        return;
+      }
+      if (!confirm(`Confirmer la modification du montant du ticket à ${formatDH(val)} ?`)) {
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'transactions', currentTicketTransId), {
+          montant: val,
+          montantModifieParCaisse: true,
+          montantInitial: currentExpectedAmount
+        });
+        currentExpectedAmount = val;
+        const clientBal = clientBalancesCache ? (clientBalancesCache.get(currentTicketClientId) || 0) : 0;
+        const rem = clientBal - val;
+        document.getElementById('modal-ticket-balance-summary').innerHTML = `
+          Solde : <strong>${formatDH(clientBal)}</strong> → Après validation : <strong class="${rem < 0 ? 'text-danger' : 'text-success'}">${formatDH(rem)}</strong>
+          ${rem < 0 ? '<span class="badge-alert-pill" style="margin-left: 5px;">Découvert</span>' : ''}
+        `;
+        alert(`Montant ajusté avec succès à ${formatDH(val)}.`);
+      } catch (err) {
+        console.error("Erreur mise à jour montant:", err);
+        alert("Erreur lors de la mise à jour : " + err.message);
+      }
+    };
+
+    window.downloadCurrentTicketImage = () => {
+      if (!currentTicketDataUrl) {
+        alert("Aucune image disponible à télécharger.");
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = currentTicketDataUrl;
+      const safeName = (currentTicketClientName || 'ticket').replace(/\s+/g, '_');
+      a.download = `ticket-${safeName}-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    // Raccourcis clavier (V pour Valider, R pour Rejeter, Échap pour fermer)
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        closeRejectModal();
         closeTicketModal();
         closeDepotModal();
         closeCommandeModal();
         closeClientHistoryModal();
+        closeNewClientModal();
+        return;
+      }
+      const ticketModal = document.getElementById('ticket-modal');
+      const isInputFocused = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+      if (ticketModal && ticketModal.style.display === 'flex' && !isInputFocused) {
+        if (e.key === 'v' || e.key === 'V') {
+          e.preventDefault();
+          validerCurrentTicketFromModal();
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          openRejectModalForCurrentTicket();
+        }
       }
     });
 

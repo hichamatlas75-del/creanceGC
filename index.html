@@ -579,6 +579,72 @@
       margin: 4px 0 16px;
       letter-spacing: 0.5px;
       text-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+      transition: color var(--transition);
+    }
+
+    .balance-amount.positive {
+      color: var(--accent-green);
+    }
+
+    .balance-amount.negative {
+      color: var(--accent-red);
+    }
+
+    .balance-amount.zero {
+      color: #64748b;
+    }
+
+    .balance-badge.positive {
+      background: rgba(22, 163, 74, 0.08);
+      border-color: rgba(22, 163, 74, 0.25);
+      color: var(--accent-green);
+    }
+
+    .balance-badge.negative {
+      background: rgba(220, 38, 38, 0.08);
+      border-color: rgba(220, 38, 38, 0.25);
+      color: var(--accent-red);
+    }
+
+    .balance-badge.negative .pulse-dot {
+      background: var(--accent-red);
+      animation: pulseRed 2s infinite;
+    }
+
+    @keyframes pulseRed {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+      70% { box-shadow: 0 0 0 7px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    .balance-debt-alert {
+      display: none;
+      margin: 4px auto 12px;
+      padding: 10px 14px;
+      background: rgba(220, 38, 38, 0.08);
+      border: 1px solid rgba(220, 38, 38, 0.25);
+      border-radius: var(--radius-sm);
+      color: var(--accent-red);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.45;
+      text-align: center;
+      max-width: 380px;
+    }
+
+    .balance-pending-note {
+      display: none;
+      margin: 4px auto 14px;
+      padding: 8px 14px;
+      background: rgba(217, 119, 6, 0.08);
+      border: 1px solid rgba(217, 119, 6, 0.25);
+      border-radius: var(--radius-sm);
+      color: #b45309;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.45;
+      text-align: center;
+      max-width: 380px;
     }
 
     .balance-notice {
@@ -1015,10 +1081,18 @@
       padding: 4px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .history-filter-bar::-webkit-scrollbar {
+      display: none;
     }
 
     .history-filter-btn {
       flex: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
       background: transparent;
       border: none;
       color: var(--text-muted);
@@ -1186,6 +1260,67 @@
 
     .history-amount.commande {
       color: var(--accent-red);
+    }
+
+    .history-amount.rejete {
+      color: #94a3b8 !important;
+      text-decoration: line-through;
+    }
+
+    .history-amount.en_attente {
+      color: #d97706;
+    }
+
+    .history-icon.rejete {
+      background: rgba(148, 163, 184, 0.15);
+      color: #64748b;
+    }
+
+    .history-icon.en_attente {
+      background: rgba(217, 119, 6, 0.1);
+      color: #d97706;
+    }
+
+    .history-rejection-reason {
+      font-size: 11px;
+      color: var(--accent-red);
+      background: rgba(220, 38, 38, 0.08);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .history-non-debite-tag {
+      font-size: 10px;
+      color: #64748b;
+      background: #e2e8f0;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-left: 4px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-cancel-order {
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--accent-red);
+      border: 1px solid rgba(220, 38, 38, 0.25);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-cancel-order:hover {
+      background: var(--accent-red);
+      color: #ffffff;
+      border-color: var(--accent-red);
     }
 
     .btn-ticket-sm {
@@ -1922,6 +2057,14 @@
           </svg>
           <span id="zoom-label">Zoom</span>
         </button>
+        <button type="button" class="toolbar-btn" onclick="downloadClientTicketImage()" title="Télécharger la photo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Télécharger</span>
+        </button>
         <button type="button" class="toolbar-btn toolbar-close" onclick="closeTicketModal()" title="Fermer (Échap)">✕</button>
       </div>
 
@@ -2056,6 +2199,8 @@
           </div>
         </div>
         <div class="balance-amount" id="balance-value">0,00 DH</div>
+        <div id="balance-debt-alert" class="balance-debt-alert"></div>
+        <div id="balance-pending-note" class="balance-pending-note"></div>
         <div class="balance-notice">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
@@ -2080,7 +2225,6 @@
           </svg>
           <span>WhatsApp</span>
         </button>
-      </section>
       </section>
 
       <!-- Carte 2 : Nouvelle commande -->
@@ -2174,12 +2318,20 @@
 
         <div class="history-filter-bar">
           <button type="button" class="history-filter-btn active" id="filter-btn-all" onclick="setHistoryFilter('all')">
-            <span>Tous les mouvements</span>
+            <span>Tous</span>
             <span id="count-all" class="history-filter-badge">0</span>
           </button>
           <button type="button" class="history-filter-btn" id="filter-btn-tickets" onclick="setHistoryFilter('tickets')">
-            <span>📷 Mes tickets</span>
+            <span>📷 Tickets</span>
             <span id="count-tickets" class="history-filter-badge">0</span>
+          </button>
+          <button type="button" class="history-filter-btn" id="filter-btn-pending" onclick="setHistoryFilter('pending')">
+            <span>⏳ En attente</span>
+            <span id="count-pending" class="history-filter-badge">0</span>
+          </button>
+          <button type="button" class="history-filter-btn" id="filter-btn-valide" onclick="setHistoryFilter('valide')">
+            <span>✓ Validés</span>
+            <span id="count-valide" class="history-filter-badge">0</span>
           </button>
         </div>
 
@@ -2206,6 +2358,7 @@
       doc,
       getDoc,
       setDoc,
+      deleteDoc,
       collection,
       query,
       where,
@@ -2243,6 +2396,7 @@
       if (val.includes('@')) {
         val = val.split('@')[0];
       }
+      val = val.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const clean = val.replace(/[^a-z0-9._-]/g, '');
       return `${clean}@greycorner.app`;
     };
@@ -2499,6 +2653,14 @@
 
       try {
         const email = usernameToEmail(usernameInput);
+        const cleanUser = email.split('@')[0];
+        if (cleanUser.length < 3) {
+          showAuthAlert("Le nom d'utilisateur doit comporter au moins 3 caractères valides.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Créer mon compte";
+          isRegistering = false;
+          return;
+        }
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
 
@@ -2633,25 +2795,67 @@
         const list = [];
         let totalDepotsCents = 0;
         let totalCommandesCents = 0;
+        let pendingCommandesCents = 0;
+        let pendingCount = 0;
 
         snapshot.forEach((docSnap) => {
           const t = { id: docSnap.id, ...docSnap.data() };
           list.push(t);
 
           // Seules les transactions valides comptent pour le solde (calcul en centimes sans dérive flottante)
+          const mCents = Math.round((Number(t.montant) || 0) * 100);
           if (t.statut === 'valide') {
-            const mCents = Math.round((Number(t.montant) || 0) * 100);
             if (t.type === 'depot') {
               totalDepotsCents += mCents;
             } else if (t.type === 'commande') {
               totalCommandesCents += mCents;
             }
+          } else if (t.statut === 'en_attente') {
+            if (t.type === 'commande') {
+              pendingCommandesCents += mCents;
+              pendingCount++;
+            }
           }
         });
 
         // Solde = Dépôts validés − Commandes validées
-        const solde = (totalDepotsCents - totalCommandesCents) / 100;
-        document.getElementById('balance-value').textContent = formatDH(solde);
+        const soldeCents = totalDepotsCents - totalCommandesCents;
+        const solde = soldeCents / 100;
+        const balanceEl = document.getElementById('balance-value');
+        if (balanceEl) {
+          balanceEl.textContent = formatDH(solde);
+          balanceEl.classList.remove('positive', 'negative', 'zero');
+          if (solde > 0) balanceEl.classList.add('positive');
+          else if (solde < 0) balanceEl.classList.add('negative');
+          else balanceEl.classList.add('zero');
+        }
+
+        const badgeEl = document.querySelector('.balance-badge');
+        if (badgeEl) {
+          badgeEl.classList.remove('positive', 'negative');
+          if (solde > 0) badgeEl.classList.add('positive');
+          else if (solde < 0) badgeEl.classList.add('negative');
+        }
+
+        const debtAlert = document.getElementById('balance-debt-alert');
+        if (debtAlert) {
+          if (solde < 0) {
+            debtAlert.style.display = 'block';
+            debtAlert.innerHTML = `⚠️ <strong>Solde débiteur :</strong> Pensez à réapprovisionner votre compte à la caisse (${formatDH(Math.abs(solde))} dus).`;
+          } else {
+            debtAlert.style.display = 'none';
+          }
+        }
+
+        const pendingNote = document.getElementById('balance-pending-note');
+        if (pendingNote) {
+          if (pendingCommandesCents > 0) {
+            pendingNote.style.display = 'block';
+            pendingNote.innerHTML = `⏳ <strong>${formatDH(pendingCommandesCents / 100)}</strong> en attente de validation à la caisse (${pendingCount} commande${pendingCount > 1 ? 's' : ''})`;
+          } else {
+            pendingNote.style.display = 'none';
+          }
+        }
 
         // Tri côté client par createdAt décroissant (pas d'index composite requis)
         list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -2664,16 +2868,30 @@
     }
 
     // Filtre & Rendu de l'historique et des tickets
-    let currentHistoryFilter = 'all'; // 'all' | 'tickets'
+    let currentHistoryFilter = 'all'; // 'all' | 'tickets' | 'pending' | 'valide'
     let cachedTransactionsList = [];
 
     window.setHistoryFilter = (filter) => {
       currentHistoryFilter = filter;
-      const btnAll = document.getElementById('filter-btn-all');
-      const btnTickets = document.getElementById('filter-btn-tickets');
-      if (btnAll) btnAll.classList.toggle('active', filter === 'all');
-      if (btnTickets) btnTickets.classList.toggle('active', filter === 'tickets');
+      ['all', 'tickets', 'pending', 'valide'].forEach((f) => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (btn) btn.classList.toggle('active', filter === f);
+      });
       renderHistory();
+    };
+
+    // Annulation d'une commande en attente par le client
+    window.handleCancelOrder = async (transId) => {
+      if (!confirm("Voulez-vous vraiment annuler cette commande en attente ?")) return;
+      try {
+        const batch = writeBatch(db);
+        batch.delete(doc(db, 'transactions', transId));
+        batch.delete(doc(db, 'tickets', transId));
+        await batch.commit();
+      } catch (err) {
+        console.error("Erreur annulation commande:", err);
+        alert("Impossible d'annuler cette commande : " + (err.message || "Erreur de permission"));
+      }
     };
 
     function renderHistory() {
@@ -2681,30 +2899,36 @@
       const countEl = document.getElementById('history-count');
       const countAllEl = document.getElementById('count-all');
       const countTicketsEl = document.getElementById('count-tickets');
+      const countPendingEl = document.getElementById('count-pending');
+      const countValideEl = document.getElementById('count-valide');
 
       const allItems = cachedTransactionsList;
       const ticketItems = allItems.filter(item => item.hasTicket);
+      const pendingItems = allItems.filter(item => item.statut === 'en_attente');
+      const validItems = allItems.filter(item => item.statut === 'valide');
 
       if (countAllEl) countAllEl.textContent = allItems.length;
       if (countTicketsEl) countTicketsEl.textContent = ticketItems.length;
+      if (countPendingEl) countPendingEl.textContent = pendingItems.length;
+      if (countValideEl) countValideEl.textContent = validItems.length;
 
-      const items = currentHistoryFilter === 'tickets' ? ticketItems : allItems;
+      let items = allItems;
+      if (currentHistoryFilter === 'tickets') items = ticketItems;
+      else if (currentHistoryFilter === 'pending') items = pendingItems;
+      else if (currentHistoryFilter === 'valide') items = validItems;
+
       countEl.textContent = `${items.length} ${currentHistoryFilter === 'tickets' ? 'ticket' : 'mouvement'}${items.length > 1 ? 's' : ''}`;
 
       if (items.length === 0) {
+        let emptyMsg = 'Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.';
         if (currentHistoryFilter === 'tickets') {
-          container.innerHTML = `
-            <div class="empty-state">
-              📷 Aucun ticket pour le moment.<br>Lorsque vous envoyez un ticket avec sa photo, il apparaîtra ici.
-            </div>
-          `;
-        } else {
-          container.innerHTML = `
-            <div class="empty-state">
-              Aucun mouvement pour le moment.<br>Vos dépôts et commandes apparaîtront ici.
-            </div>
-          `;
+          emptyMsg = '📷 Aucun ticket pour le moment.<br>Lorsque vous envoyez un ticket avec sa photo, il apparaîtra ici.';
+        } else if (currentHistoryFilter === 'pending') {
+          emptyMsg = '⏳ Aucune commande en attente.<br>Toutes vos commandes ont été traitées par la caisse.';
+        } else if (currentHistoryFilter === 'valide') {
+          emptyMsg = '✓ Aucun mouvement validé pour le moment.';
         }
+        container.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
         return;
       }
 
@@ -2712,16 +2936,26 @@
       items.forEach((item) => {
         const isDepot = item.type === 'depot';
         const typeLabel = isDepot ? 'Dépôt caisse' : (item.hasTicket ? 'Commande avec ticket' : 'Commande caisse');
-        const sign = isDepot ? '+' : '−';
+        const isPending = item.statut === 'en_attente';
+        const isRejected = item.statut === 'rejete';
+
+        let sign = isDepot ? '+' : '−';
+        let cls = isDepot ? 'depot' : 'commande';
+        if (isRejected) {
+          cls = 'rejete';
+          sign = '';
+        } else if (isPending) {
+          cls = 'en_attente';
+        }
+
         const iconSymbol = isDepot ? '+' : (item.hasTicket ? '📷' : '−');
-        const cls = isDepot ? 'depot' : 'commande';
 
         let badgeLabel = 'Validé';
         let badgeCls = 'valide';
-        if (item.statut === 'en_attente') {
+        if (isPending) {
           badgeLabel = 'En attente';
           badgeCls = 'en_attente';
-        } else if (item.statut === 'rejete') {
+        } else if (isRejected) {
           badgeLabel = 'Rejeté';
           badgeCls = 'rejete';
         }
@@ -2740,6 +2974,22 @@
           </button>
         ` : '';
 
+        const cancelBtnHtml = isPending ? `
+          <button type="button" class="btn-cancel-order" onclick="event.stopPropagation(); handleCancelOrder('${escapeHtml(item.id)}')" title="Annuler cette commande">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Annuler
+          </button>
+        ` : '';
+
+        const rejectionReasonHtml = (isRejected && item.motifRejet) ? `
+          <div class="history-rejection-reason">Motif : ${escapeHtml(item.motifRejet)}</div>
+        ` : '';
+
+        const nonDebiteTag = isRejected ? `<span class="history-non-debite-tag">Non débité</span>` : '';
+
         const itemClick = item.hasTicket
           ? `onclick="openTicketModal('${escapeHtml(item.id)}', '${escapeHtml(dateStr)}', '${escapeHtml(amountStr)}')"`
           : '';
@@ -2750,14 +3000,20 @@
             <div class="history-left">
               <div class="history-icon ${cls}">${iconSymbol}</div>
               <div class="history-details">
-                <div class="history-title">${escapeHtml(typeLabel)}</div>
+                <div class="history-title">${escapeHtml(typeLabel)} ${nonDebiteTag}</div>
                 <div class="history-date">${escapeHtml(dateStr)}</div>
-                <span class="history-badge ${badgeCls}">${badgeLabel}</span>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <span class="history-badge ${badgeCls}">${badgeLabel}</span>
+                  ${rejectionReasonHtml}
+                </div>
               </div>
             </div>
             <div class="history-right">
               <div class="history-amount ${cls}">${sign}${escapeHtml(amountStr)}</div>
-              ${ticketBtnHtml}
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                ${ticketBtnHtml}
+                ${cancelBtnHtml}
+              </div>
             </div>
           </div>
         `;
@@ -2823,56 +3079,58 @@
       });
     }
 
-    // Extraction robuste du montant Total TTC d'un ticket de caisse
+    // Extraction robuste du montant Total TTC d'un ticket de caisse (formats entiers, décimaux et corrections OCR)
     function parseTotalFromReceiptText(text) {
       if (!text) return null;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-      // Priorité 1 : Lignes explicites ciblant "TOTAL TTC", "NET A PAYER", etc.
-      const priorityPats = [
-        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i,
-        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})(?:\s*dh|\s*mad)?/i,
-        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/i
+      const cleanNumber = (str) => {
+        if (!str) return null;
+        let s = str.replace(/\s+/g, '').replace(/,/g, '.');
+        s = s.replace(/([0-9])o([0-9])/gi, '$10$2');
+        const n = parseFloat(s);
+        return (!isNaN(n) && n > 0 && n < 50000) ? n : null;
+      };
+
+      const priorityPatterns = [
+        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
+        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
+        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i
       ];
 
       for (const line of lines) {
-        // Ignorer sous-totaux, TVA ou remises si ce n'est pas expressément le Total TTC
         if (/sous[- ]*total|total\s*ht|base\s*ht|tva|remise/i.test(line) && !/total\s*ttc/i.test(line)) {
           continue;
         }
-        for (const regex of priorityPats) {
+        for (const regex of priorityPatterns) {
           const match = line.match(regex);
           if (match && match[1]) {
-            const clean = match[1].replace(/\s/g, '').replace(',', '.');
-            const num = parseFloat(clean);
-            if (!isNaN(num) && num > 0 && num < 100000) {
-              return num;
-            }
+            const val = cleanNumber(match[1]);
+            if (val !== null) return val;
           }
         }
       }
 
-      // Recherche contextuelle autour du mot-clé TOTAL dans le texte entier
-      const fullText = text.replace(/\r/g, ' ');
-      const totalMatches = [...fullText.matchAll(/(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/gi)];
-      if (totalMatches.length > 0) {
-        const lastMatch = totalMatches[totalMatches.length - 1];
+      const fullText = text.replace(/[\r\n]+/g, ' ');
+      const globalRegex = /(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi;
+      const matches = [...fullText.matchAll(globalRegex)];
+      if (matches.length > 0) {
+        const lastMatch = matches[matches.length - 1];
         if (lastMatch && lastMatch[1]) {
-          const num = parseFloat(lastMatch[1].replace(/\s/g, '').replace(',', '.'));
-          if (!isNaN(num) && num > 0) return num;
+          const val = cleanNumber(lastMatch[1]);
+          if (val !== null) return val;
         }
       }
 
-      // Fallback : nombre le plus élevé parmi les dernières lignes du ticket (hors coordonnées/tél/wifi/ice)
       const candidateNumbers = [];
       const bottomLines = lines.slice(Math.max(0, lines.length - 10));
       for (const line of bottomLines) {
         if (/tel|wifi|ice|rc|patente|if|date|heure|table|serveur|couvert/i.test(line)) continue;
-        const matches = line.matchAll(/([0-9]{1,5}[\s]*[.,][\s]*[0-9]{2})/g);
-        for (const m of matches) {
-          const num = parseFloat(m[1].replace(/\s/g, '').replace(',', '.'));
-          if (!isNaN(num) && num > 0 && num < 50000) {
-            candidateNumbers.push(num);
+        const numMatches = line.matchAll(/([0-9]{1,5}(?:[.,][0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi);
+        for (const m of numMatches) {
+          const val = cleanNumber(m[1]);
+          if (val !== null && val >= 3) {
+            candidateNumbers.push(val);
           }
         }
       }
@@ -2920,7 +3178,7 @@
       badgeEl.classList.remove('hidden');
       badgeEl.innerHTML = `<span class="spinner-sm"></span> <span>Lecture auto...</span>`;
       badgeEl.style.color = "var(--accent-brass)";
-      badgeEl.style.borderColor = "rgba(195, 161, 91, 0.35)";
+      badgeEl.style.borderColor = "rgba(37, 99, 235, 0.35)";
 
       msgEl.className = "ocr-message scanning";
       msgEl.innerHTML = `<span class="spinner-sm"></span> <span>Lecture automatique du montant sur le ticket en cours...</span>`;
@@ -2941,6 +3199,7 @@
           amountInput.classList.add('input-glow-success');
           setTimeout(() => amountInput.classList.remove('input-glow-success'), 3500);
 
+          if (navigator.vibrate) { try { navigator.vibrate(40); } catch(e) {} }
           badgeEl.innerHTML = `<span>✓</span> <span>Montant détecté</span>`;
           badgeEl.style.color = "var(--accent-green)";
           badgeEl.style.borderColor = "var(--accent-green)";
@@ -3110,6 +3369,8 @@
 
         await batch.commit();
 
+        if (navigator.vibrate) { try { navigator.vibrate(60); } catch(e) {} }
+
         // Réinitialisation du formulaire
         amountInput.value = '';
         clearSelectedPhoto();
@@ -3189,6 +3450,17 @@
         console.error("Ticket fetch error:", err);
         loader.innerHTML = `<span>Erreur de chargement du ticket.</span>`;
       }
+    };
+
+    window.downloadClientTicketImage = () => {
+      const img = document.getElementById('modal-img');
+      if (!img || !img.src) return;
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = `ticket-greycorner-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     };
 
     window.closeTicketModal = () => {
