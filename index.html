@@ -2453,9 +2453,19 @@
       return file;
     }
 
-    // Compression d'image canvas haute compatibilité (Samsung Internet, Chrome, iOS)
+    // Compression d'image canvas haute compatibilité avec garde-fou strict Firebase (limite Firestore 1 Mo)
     async function compressImage(rawFile, maxDimension = 1000, quality = 0.65) {
       const file = await convertHeicIfNeeded(rawFile);
+      const MAX_SAFE_DATAURL_LENGTH = 700000; // ~525 Ko max en Base64, largement sous la limite stricte de 1 048 576 octets Firestore
+
+      const safeScaleCanvas = (sourceCanvas, targetWidth, targetHeight, targetQuality) => {
+        const c = document.createElement('canvas');
+        c.width = targetWidth;
+        c.height = targetHeight;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(sourceCanvas, 0, 0, targetWidth, targetHeight);
+        return c.toDataURL('image/jpeg', targetQuality);
+      };
 
       // Stratégie 1 : Décodage moderne haute performance avec createImageBitmap (sans surconsommation mémoire RAM)
       if ('createImageBitmap' in window) {
@@ -2480,13 +2490,20 @@
           bitmap.close(); // Libération immédiate de la mémoire GPU
 
           let dataUrl = canvas.toDataURL('image/jpeg', quality);
-          if (dataUrl.length > 800000) {
-            const canvas2 = document.createElement('canvas');
-            canvas2.width = Math.round(width * 0.75);
-            canvas2.height = Math.round(height * 0.75);
-            const ctx2 = canvas2.getContext('2d');
-            ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height);
-            dataUrl = canvas2.toDataURL('image/jpeg', 0.45);
+
+          // Paliers de sécurité stricts pour garantir l'acceptation sans faille par Firestore :
+          if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.50);
+          }
+          if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+            const w2 = Math.round(width * 0.8);
+            const h2 = Math.round(height * 0.8);
+            dataUrl = safeScaleCanvas(canvas, w2, h2, 0.45);
+          }
+          if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+            const w3 = Math.round(width * 0.65);
+            const h3 = Math.round(height * 0.65);
+            dataUrl = safeScaleCanvas(canvas, w3, h3, 0.40);
           }
           return dataUrl;
         } catch (bitmapErr) {
@@ -2520,13 +2537,18 @@
             ctx.drawImage(img, 0, 0, width, height);
             let dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-            if (dataUrl.length > 800000) {
-              const canvas2 = document.createElement('canvas');
-              canvas2.width = Math.round(width * 0.75);
-              canvas2.height = Math.round(height * 0.75);
-              const ctx2 = canvas2.getContext('2d');
-              ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height);
-              dataUrl = canvas2.toDataURL('image/jpeg', 0.45);
+            if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+              dataUrl = canvas.toDataURL('image/jpeg', 0.50);
+            }
+            if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+              const w2 = Math.round(width * 0.8);
+              const h2 = Math.round(height * 0.8);
+              dataUrl = safeScaleCanvas(canvas, w2, h2, 0.45);
+            }
+            if (dataUrl.length > MAX_SAFE_DATAURL_LENGTH) {
+              const w3 = Math.round(width * 0.65);
+              const h3 = Math.round(height * 0.65);
+              dataUrl = safeScaleCanvas(canvas, w3, h3, 0.40);
             }
             resolve(dataUrl);
           };
@@ -3289,7 +3311,7 @@
       if (hintText) hintText.textContent = "Traitement de l'image...";
 
       try {
-        selectedCompressedPhoto = await compressImage(file, 1200, 0.75);
+        selectedCompressedPhoto = await compressImage(file, 1000, 0.65);
         const previewImg = document.getElementById('preview-img');
         previewImg.src = selectedCompressedPhoto;
         document.getElementById('preview-box').style.display = 'block';
