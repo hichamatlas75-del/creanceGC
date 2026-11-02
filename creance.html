@@ -3079,60 +3079,95 @@
       });
     }
 
-    // Extraction robuste du montant Total TTC d'un ticket de caisse (formats entiers, décimaux et corrections OCR)
+    // Extraction robuste du montant Total TTC d'un ticket de caisse (formats entiers, décimaux, tolérance aux espaces et corrections OCR)
     function parseTotalFromReceiptText(text) {
       if (!text) return null;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-      const cleanNumber = (str) => {
-        if (!str) return null;
-        let s = str.replace(/\s+/g, '').replace(/,/g, '.');
-        s = s.replace(/([0-9])o([0-9])/gi, '$10$2');
+      const cleanOcrNumber = (raw) => {
+        if (!raw) return null;
+        let s = raw.replace(/\s+/g, '').replace(/,/g, '.');
+        s = s.replace(/[oOD]/g, '0');
+        s = s.replace(/b/g, '6');
+        s = s.replace(/B/g, '8');
+        s = s.replace(/[lI|]/g, '1');
+        s = s.replace(/[^0-9.]/g, '');
+        const parts = s.split('.');
+        if (parts.length > 2) {
+          const decimals = parts.pop();
+          s = parts.join('') + '.' + decimals;
+        }
         const n = parseFloat(s);
         return (!isNaN(n) && n > 0 && n < 50000) ? n : null;
       };
 
+      // Token numérique flexible : tolère les espaces entre chiffres et les substitutions OCR fréquentes
+      const numToken = '[0-9bBoODlI|](?:[\\s]*[0-9bBoODlI|])*(?:[\\s]*[.,][\\s]*[0-9oOD]{1,2})?';
+
       const priorityPatterns = [
-        /(?:total\s*ttc|totai\s*ttc|total\s*tic|net\s*a\s*payer|a\s*payer|total\s*net|total\s*global)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
-        /(?:total|totai|tot1|totl|tota)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i,
-        /(?:ttc|tic|t1c)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/i
+        new RegExp(`(?:total\\s*ttc|totai\\s*ttc|total\\s*tic|net\\s*a\\s*payer|a\\s*payer|total\\s*net|total\\s*global)\\s*[:=\\s]*(${numToken})`, 'i'),
+        new RegExp(`(?:total|totai|tot1|totl|tota)\\s*[:=\\s]*(${numToken})`, 'i'),
+        new RegExp(`(?:ttc|tic|t1c)\\s*[:=\\s]*(${numToken})`, 'i')
       ];
 
-      for (const line of lines) {
+      let candidatePriority = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         if (/sous[- ]*total|total\s*ht|base\s*ht|tva|remise/i.test(line) && !/total\s*ttc/i.test(line)) {
           continue;
         }
+
         for (const regex of priorityPatterns) {
           const match = line.match(regex);
           if (match && match[1]) {
-            const val = cleanNumber(match[1]);
-            if (val !== null) return val;
+            const val = cleanOcrNumber(match[1]);
+            if (val !== null) {
+              candidatePriority = val;
+              break;
+            }
+          }
+        }
+        if (candidatePriority !== null) break;
+
+        // Si la ligne contient le mot-clé Total mais que le montant est sur la ligne suivante
+        if (/(?:total\s*ttc|total|net\s*a\s*payer)/i.test(line) && i + 1 < lines.length) {
+          const nextLine = lines[i + 1];
+          const nextMatch = nextLine.match(new RegExp(`^[:=\\s]*(${numToken})`, 'i'));
+          if (nextMatch && nextMatch[1]) {
+            const val = cleanOcrNumber(nextMatch[1]);
+            if (val !== null) {
+              candidatePriority = val;
+              break;
+            }
           }
         }
       }
 
-      const fullText = text.replace(/[\r\n]+/g, ' ');
-      const globalRegex = /(?:total\s*ttc|total|net\s*a\s*payer)\s*[:=\s]*([0-9]{1,5}(?:[\s]*[.,][\s]*[0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi;
-      const matches = [...fullText.matchAll(globalRegex)];
-      if (matches.length > 0) {
-        const lastMatch = matches[matches.length - 1];
-        if (lastMatch && lastMatch[1]) {
-          const val = cleanNumber(lastMatch[1]);
-          if (val !== null) return val;
-        }
-      }
-
+      // Collecte de tous les chiffres candidats plausibles dans les lignes du bas du ticket
       const candidateNumbers = [];
-      const bottomLines = lines.slice(Math.max(0, lines.length - 10));
+      const bottomLines = lines.slice(Math.max(0, lines.length - 12));
       for (const line of bottomLines) {
         if (/tel|wifi|ice|rc|patente|if|date|heure|table|serveur|couvert/i.test(line)) continue;
-        const numMatches = line.matchAll(/([0-9]{1,5}(?:[.,][0-9]{1,2})?)(?:\s*(?:dh|mad))?/gi);
-        for (const m of numMatches) {
-          const val = cleanNumber(m[1]);
+        const allMatches = line.matchAll(new RegExp(`(${numToken})`, 'gi'));
+        for (const m of allMatches) {
+          const val = cleanOcrNumber(m[1]);
           if (val !== null && val >= 3) {
             candidateNumbers.push(val);
           }
         }
+      }
+
+      // Protection contre les artefacts de détection où le total prioritaire est manifestement tronqué (< 3 DH)
+      // alors que des montants d'articles ou de total réalistes (>= 5 DH) existent sur le ticket
+      if (candidatePriority !== null) {
+        if (candidatePriority < 3 && candidateNumbers.length > 0) {
+          const maxCandidate = Math.max(...candidateNumbers);
+          if (maxCandidate >= 5) {
+            return maxCandidate;
+          }
+        }
+        return candidatePriority;
       }
 
       if (candidateNumbers.length > 0) {
@@ -3254,7 +3289,7 @@
       if (hintText) hintText.textContent = "Traitement de l'image...";
 
       try {
-        selectedCompressedPhoto = await compressImage(file, 1000, 0.65);
+        selectedCompressedPhoto = await compressImage(file, 1200, 0.75);
         const previewImg = document.getElementById('preview-img');
         previewImg.src = selectedCompressedPhoto;
         document.getElementById('preview-box').style.display = 'block';
