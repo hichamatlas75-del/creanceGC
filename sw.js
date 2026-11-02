@@ -1,17 +1,15 @@
 /* ==========================================================================
    Service Worker — Grey Corner PWA
-   Version: 1.0.1 (Fix auth & Firebase Hosting bypass)
+   Version: 1.1.0 (Clean assets, robust offline navigation)
    ========================================================================== */
 
-const CACHE_NAME = 'grey-corner-cache-v5';
+const CACHE_NAME = 'grey-corner-cache-v6';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './creance.html',
   './caisse.html',
   './manifest.webmanifest',
-  './manifest.json',
   './favicon.ico',
   './assets/logo.png',
   './assets/og-image.jpg',
@@ -91,6 +89,9 @@ self.addEventListener('fetch', (event) => {
         .catch(async () => {
           const cached = await caches.match(req);
           if (cached) return cached;
+          if (url.pathname.includes('caisse')) {
+            return caches.match('./caisse.html');
+          }
           return caches.match('./index.html');
         })
     );

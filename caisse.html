@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Grey Corner — Espace Caisse</title>
 
   <!-- PWA & WebManifest (Android & Modern Browsers) -->
@@ -1396,6 +1396,11 @@
           <input type="number" id="commande-amount" step="0.01" min="0.01" inputmode="decimal" placeholder="ex. 85.00" required autofocus oninput="checkCommandeOverrun()">
         </div>
 
+        <div class="form-group" style="margin-top: 10px;">
+          <label for="commande-note">Motif / Consommations (facultatif)</label>
+          <input type="text" id="commande-note" placeholder="ex. Café, Déjeuner, Boissons...">
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-cancel" onclick="closeCommandeModal()">Annuler</button>
           <button type="submit" id="btn-commande-submit" class="btn btn-commande">Valider le débit</button>
@@ -1656,6 +1661,9 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore,
+      initializeFirestore,
+      persistentLocalCache,
+      persistentMultipleTabManager,
       doc,
       getDoc,
       setDoc,
@@ -1683,7 +1691,16 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    let db;
+    try {
+      db = initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      });
+    } catch (e) {
+      db = getFirestore(app);
+    }
 
     // App secondaire pour la création de client sans déconnecter la caisse
     let secondaryApp = null;
@@ -2030,7 +2047,7 @@
       renderClientsTab(clientBalances);
 
       // 4. Rendu Onglet 3 : Journal
-      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete');
+      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete' && t.statut !== 'annule');
       validHistory.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       const journal200 = validHistory.slice(0, 200);
       renderJournalTab(journal200);
@@ -2389,15 +2406,24 @@
         const clientObj = usersMap.get(t.clientId);
         const clientName = clientObj ? (clientObj.nom || clientObj.username) : `Client (${t.clientId.slice(0, 6)}...)`;
         const isDepot = t.type === 'depot';
+        const isDirectCaisse = !isDepot && !t.hasTicket;
         const sign = isDepot ? '+' : '−';
         const amountColor = isDepot ? 'var(--accent-green)' : 'var(--accent-red)';
-        const typeBadge = isDepot
-          ? '<span class="badge badge-depot">Dépôt</span>'
-          : '<span class="badge badge-commande">Commande</span>';
+        
+        let typeBadge = '';
+        if (isDepot) {
+          typeBadge = '<span class="badge badge-depot">Dépôt</span>';
+        } else if (isDirectCaisse) {
+          typeBadge = '<span class="badge badge-commande" style="background: rgba(37,99,235,0.18); color: var(--accent-brass); border: 1px solid rgba(212,175,55,0.35);" title="Commande saisie directement par la caisse">Saisie Caisse</span>';
+        } else {
+          typeBadge = '<span class="badge badge-commande">Ticket Client</span>';
+        }
 
         const statusBadge = t.statut === 'valide'
           ? '<span class="badge badge-valide">Validé</span>'
           : '<span class="badge badge-attente">En attente</span>';
+
+        const noteHtml = t.note ? `<span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">• <em>${escapeHtml(t.note)}</em></span>` : '';
 
         const ticketBtn = t.hasTicket ? `
           <button type="button" class="btn-action btn-ticket" style="padding: 4px 8px; font-size: 11px;" onclick="openTicketModal('${escapeHtml(t.id)}', ${Number(t.montant) || 0}, '${escapeHtml(t.clientId)}', '${escapeHtml(clientName)}')">
@@ -2420,6 +2446,7 @@
               </div>
               <div class="item-sub">
                 <span>${escapeHtml(formatDate(t.createdAt))}</span>
+                ${noteHtml}
               </div>
             </div>
             <div class="item-actions">
@@ -2500,6 +2527,8 @@
       document.getElementById('commande-modal-client-name').textContent = clientName;
       document.getElementById('commande-modal-client-balance').textContent = formatDH(currentBalance);
       document.getElementById('commande-amount').value = '';
+      const noteInput = document.getElementById('commande-note');
+      if (noteInput) noteInput.value = '';
       document.getElementById('commande-overrun-warning').style.display = 'none';
       document.getElementById('commande-modal').style.display = 'flex';
       setTimeout(() => document.getElementById('commande-amount').focus(), 100);
@@ -2547,6 +2576,9 @@
       btn.disabled = true;
       btn.textContent = "Validation...";
 
+      const noteInput = document.getElementById('commande-note');
+      const noteVal = noteInput ? (noteInput.value || '').trim() : '';
+
       try {
         await addDoc(collection(db, 'transactions'), {
           clientId: activeModalClientId,
@@ -2554,8 +2586,10 @@
           montant: amountVal,
           statut: 'valide',
           hasTicket: false,
+          createdByCaisse: true,
           createdAt: Date.now(),
-          by: auth.currentUser.uid
+          by: auth.currentUser.uid,
+          note: noteVal || 'Commande directe comptoir'
         });
 
         closeCommandeModal();
@@ -2570,25 +2604,27 @@
 
     // Exportation du journal en fichier CSV
     window.exportJournalCSV = () => {
-      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete');
+      const validHistory = transactionsList.filter((t) => t.statut !== 'rejete' && t.statut !== 'annule');
       if (validHistory.length === 0) {
         alert("Aucun mouvement à exporter.");
         return;
       }
       validHistory.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      let csv = "\uFEFFDate;Heure;Client;Type;Montant (DH);Statut\r\n";
+      let csv = "\uFEFFDate;Heure;Client;Type;Montant (DH);Statut;Motif/Note\r\n";
       validHistory.forEach((t) => {
         const d = t.createdAt ? new Date(t.createdAt) : new Date();
         const dateStr = d.toLocaleDateString('fr-FR');
         const heureStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         const clientObj = usersMap.get(t.clientId);
         const clientName = clientObj ? (clientObj.nom || clientObj.username) : t.clientId;
-        const typeStr = t.type === 'depot' ? 'Dépôt' : 'Commande';
+        const isDirectCaisse = !t.hasTicket && t.type === 'commande';
+        const typeStr = t.type === 'depot' ? 'Dépôt' : (isDirectCaisse ? 'Commande (Saisie Caisse)' : 'Commande (Ticket Client)');
         const montantStr = Number(t.montant || 0).toFixed(2).replace('.', ',');
         const statutStr = t.statut === 'valide' ? 'Validé' : 'En attente';
+        const noteStr = (t.note || '').replace(/"/g, '""');
 
-        csv += `"${dateStr}";"${heureStr}";"${clientName.replace(/"/g, '""')}";"${typeStr}";"${montantStr}";"${statutStr}"\r\n`;
+        csv += `"${dateStr}";"${heureStr}";"${clientName.replace(/"/g, '""')}";"${typeStr}";"${montantStr}";"${statutStr}";"${noteStr}"\r\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -2618,12 +2654,25 @@
         let html = '';
         clientTransactions.forEach((t) => {
           const isDepot = t.type === 'depot';
+          const isDirectCaisse = !isDepot && !t.hasTicket;
           const sign = isDepot ? '+' : '−';
           const amountColor = isDepot ? 'var(--accent-green)' : 'var(--accent-red)';
-          const typeBadge = isDepot ? '<span class="badge badge-depot">Dépôt</span>' : '<span class="badge badge-commande">Commande</span>';
+          
+          let typeBadge = '';
+          if (isDepot) {
+            typeBadge = '<span class="badge badge-depot">Dépôt</span>';
+          } else if (isDirectCaisse) {
+            typeBadge = '<span class="badge badge-commande" style="background: rgba(37,99,235,0.18); color: var(--accent-brass); border: 1px solid rgba(212,175,55,0.35);" title="Commande saisie directement par la caisse">Saisie Caisse</span>';
+          } else {
+            typeBadge = '<span class="badge badge-commande">Ticket Client</span>';
+          }
+
           let statusBadge = '<span class="badge badge-valide">Validé</span>';
           if (t.statut === 'en_attente') statusBadge = '<span class="badge badge-attente">En attente</span>';
           else if (t.statut === 'rejete') statusBadge = '<span class="badge" style="background: rgba(196,101,90,0.2); color: var(--accent-red);">Rejeté</span>';
+          else if (t.statut === 'annule') statusBadge = '<span class="badge" style="background: rgba(196,101,90,0.2); color: var(--accent-red);">Annulé</span>';
+
+          const noteHtml = t.note ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">📝 ${escapeHtml(t.note)}</div>` : '';
 
           html += `
             <div class="item-card" style="padding: 10px 12px; margin-bottom: 8px;">
@@ -2633,6 +2682,7 @@
                   ${statusBadge}
                 </div>
                 <div class="item-sub">${escapeHtml(formatDate(t.createdAt))}</div>
+                ${noteHtml}
                 ${t.motifRejet ? `<div style="font-size: 11px; color: var(--accent-red); margin-top: 3px;">Motif : ${escapeHtml(t.motifRejet)}</div>` : ''}
               </div>
               <div class="item-actions">

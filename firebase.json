@@ -18,6 +18,18 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "source": "/creance.html",
+        "destination": "/index.html",
+        "type": 301
+      },
+      {
+        "source": "/manifest.json",
+        "destination": "/manifest.webmanifest",
+        "type": 301
+      }
+    ],
     "headers": [
       {
         "source": "/sw.js",

@@ -4,7 +4,7 @@ service cloud.firestore {
 
     function isCaisse() {
       return request.auth != null && (
-        (request.auth.token.email != null && request.auth.token.email.matches('(?i).*caisse@.*')) ||
+        request.auth.token.email == 'caisse@greycorner.app' ||
         (exists(/databases/$(db)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role == 'caisse')
       );
@@ -14,7 +14,6 @@ service cloud.firestore {
       allow read: if request.auth != null && (request.auth.uid == uid || isCaisse());
       allow create: if request.auth != null && (
         (request.auth.uid == uid && request.resource.data.role == 'client') ||
-        (request.auth.uid == uid && isCaisse()) ||
         isCaisse()
       );
       allow update: if isCaisse();
@@ -36,12 +35,13 @@ service cloud.firestore {
           && request.resource.data.hasTicket == true)
       );
 
-      // La caisse peut valider, corriger ou rejeter ; le client peut annuler sa commande en attente
+      // La caisse peut valider, corriger ou rejeter ; le client peut annuler sa commande en attente sans altérer les autres données
       allow update: if isCaisse() || (
         request.auth != null
         && resource.data.clientId == request.auth.uid
         && resource.data.statut == 'en_attente'
         && request.resource.data.statut == 'annule'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statut', 'cancelledAt'])
       );
       allow delete: if isCaisse() || (
         request.auth != null
